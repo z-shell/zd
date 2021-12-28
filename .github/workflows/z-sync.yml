@@ -1,0 +1,17 @@
+on:
+#  push
+#name: Sync workflow across Org
+
+jobs:
+  sync-workflows:
+    name: Sync workflow across Org
+    runs-on: ubuntu-latest
+    steps:
+      - name: Sync workflow across Org
+        id: sync_workflow
+        uses: iamhughes/sync-action-workflow-across-org@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+          ORG_TOKEN: ${{ secrets.ORG_TOKEN }} # User-created PAT with repo, admin:org, and workflow scopes
+        with:
+          workflow-name: main.yml
