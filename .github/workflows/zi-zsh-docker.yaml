@@ -1,3 +1,4 @@
+---
 name: ZZD
 on: [push, workflow_dispatch]
 
@@ -32,7 +33,13 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-
+      - name: Docker Layer Caching
+        uses: satackey/action-docker-layer-caching@v0.0.11
+        with:
+          key: docker-layer-caching-${{ github.workflow }}-{hash}
+          restore-keys: docker-layer-caching-${{ github.workflow }}-
+          concurrency: 6
+          skip-save: false
       - name: Build and push
         id: docker_build_zsh_versions
         uses: docker/build-push-action@v2
