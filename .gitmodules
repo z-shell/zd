@@ -1,0 +1,4 @@
+[submodule "zi"]
+	path = zi
+	url = https://github.com/z-shell/zi
+	branch = main
