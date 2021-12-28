@@ -32,6 +32,6 @@ COPY --chown=${PUSERNAME} . /src
 
 USER ${PUSERNAME}
 
-RUN ZINIT_HOME_DIR=/data-static ZSH_NO_INIT=1 zsh -ils -c -- '@zi-scheduler burst'
+RUN ZI_HOME_DIR=/data-static ZSH_NO_INIT=1 zsh -ils -c -- '@zi-scheduler burst'
 
 CMD ["/bin/zsh"]

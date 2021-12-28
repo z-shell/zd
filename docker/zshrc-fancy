@@ -1,7 +1,7 @@
 [[ -n "$NOTHING_FANCY" ]] && return
 # >
-zinit::setup-annexes
-zinit::setup-keys
+zi::setup-annexes
+zi::setup-keys
 # >
 alias ls="ls --color=auto"
 alias vim="nvim"
@@ -20,6 +20,6 @@ setopt share_history
 mkdir -p "${HISTFILE:A:h}"
 autoload -Uz compinit
 compinit
-zinit cdreplay -q
+zi cdreplay -q
 
 # vim: ft=zsh et ts=2 sw=2

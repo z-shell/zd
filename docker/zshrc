@@ -6,7 +6,7 @@ fi
 
 source /src/zi/zi.zsh
 autoload -Uz _zi
-(( ${+_comps} )) && _comps[zinit]=_zi
+(( ${+_comps} )) && _comps[zi]=_zi
 
 source /src/docker/utils.zsh
 
@@ -14,9 +14,9 @@ typeset -U path
 path=("${ZPFX:-${HOME}/.zi/polaris}/bin" "${HOME}/go/bin" $path)
 
 # Install custom zsh version
-if [[ -n "$ZINIT_ZSH_VERSION" ]]
+if [[ -n "$ZI_ZSH_VERSION" ]]
 then
-  zi::pack-zsh "$ZINIT_ZSH_VERSION"
+  zi::pack-zsh "$ZI_ZSH_VERSION"
 fi
 
 source /src/docker/zshrc-fancy
