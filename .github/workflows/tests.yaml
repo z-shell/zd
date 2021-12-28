@@ -25,7 +25,8 @@ jobs:
     steps:
       - name: "Check out repository code"
         uses: actions/checkout@v2
-
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
       - name: "Install dependencies"
         run: |
           sudo apt install -y zsh
@@ -39,7 +40,6 @@ jobs:
           cd ..
           mv ./zunit.git/zunit bin
           chmod u+x bin/{color,revolver,zunit}
-
       - name: "ZUnit test: ${{ matrix.file }}"
         env:
           ZUNIT_TEST: ${{ matrix.file }}
