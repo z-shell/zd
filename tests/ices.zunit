@@ -30,11 +30,8 @@
 }
 
 @test 'failing atclone ice' {
-  local z=$'zi null atclone'\''echo "intentional failure"; return 69'\'' \
-      for z-shell/null'
-
-  run ./scripts/docker-run.sh --wrap --debug --zunit \
-    $z
+  local z=$'zi null atclone\'echo "intentional failure"; return 69\' for z-shell/null'
+  run ./scripts/docker-run.sh --wrap --debug --zunit $z
 
   assert $state not_equal_to 0
   assert $state equals 69
