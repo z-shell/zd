@@ -10,24 +10,24 @@
   teardown
 }
 
-@test 'sbin ice' {
-  run ./scripts/docker-run.sh --wrap --debug --zunit \
-    zi light z-shell/z-a-bin-gem-node\;\
-    zi light-mode as"null" from"gh-r" sbin'fzf' for junegunn/fzf
+#@test 'sbin ice' {
+#  run ./scripts/docker-run.sh --wrap --debug --zunit \
+#    zi light z-shell/z-a-bin-gem-node\;\
+#    zi light-mode as"null" from"gh-r" sbin'fzf' for junegunn/fzf
 
-  assert $state equals 0
+#  assert $state equals 0
   # We can't assert 'Downloading z-shell/z-a-bin-gem-node'
   # because of the control chars (colored output)
-  assert "$output" contains "Downloading"
+#  assert "$output" contains "Downloading"
 
-  local artifact="${PLUGINS_DIR}/z-shell---z-a-bin-gem-node/z-a-bin-gem-node.plugin.zsh"
-  assert "$artifact" is_file
-  assert "$artifact" is_readable
+#  local artifact="${PLUGINS_DIR}/z-shell---z-a-bin-gem-node/z-a-bin-gem-node.plugin.zsh"
+#  assert "$artifact" is_file
+#  assert "$artifact" is_readable
 
-  artifact="${ZPFX}/bin/fzf"
-  assert "$artifact" is_file
-  assert "$artifact" is_executable
-}
+#  artifact="${ZPFX}/bin/fzf"
+#  assert "$artifact" is_file
+#  assert "$artifact" is_executable
+#}
 
 #@test 'failing atclone ice' {
 #  local z=$'zi null atclone'\''echo "intentional failure"; return 255'\'' for z-shell/null'
@@ -51,9 +51,7 @@
 #}
 
 @test 'failing mv ice' {
-  local z=$'zi as'\''command'\'' from'\''gh-r'\'' bpick'\''*musl*'\'' mv'\''DOES_NOT_EXIST* -> fd'\'' \
-      pick'\''fd/fd'\'' for @sharkdp/fd'
-
+  local z=$'zi as'\''command'\'' from'\''gh-r'\'' bpick'\''*musl*'\'' mv'\''DOES_NOT_EXIST* -> fd'\'' pick'\''fd/fd'\'' for @sharkdp/fd'
   run ./scripts/docker-run.sh --wrap --debug --zunit $z
 
   assert $state equals 1
@@ -62,8 +60,7 @@
 }
 
 @test 'mv ice' {
-  local z=$'zi as'\''command'\'' from'\''gh-r'\'' bpick'\''*musl*'\'' mv'\''fd* -> fd'\'' \
-      pick'\''fd/fd'\'' for @sharkdp/fd'
+  local z=$'zi as'\''command'\'' from'\''gh-r'\'' bpick'\''*musl*'\'' mv'\''fd* -> fd'\'' pick'\''fd/fd'\'' for @sharkdp/fd'
   run ./scripts/docker-run.sh --wrap --debug --zunit $z
 
   assert $state equals 0
