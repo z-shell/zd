@@ -17,7 +17,7 @@ jobs:
           github-token: "${{ secrets.GITHUB_TOKEN }}"
           pull-request-number: "${{ github.event.pull_request.number }}"
           valid-labels: >
-            "breaking-change 💥, bug 🐞, documentation 📝, enhancement ✨,
-            security 🛡️, refactor ♻️, performance 🚀, new-feature 🎉, triage 📑, maintenance 📈,
-            ci 🤖, in-progress ⚡, dependencies 📦, submodules ⚙️"
+            "breaking-change 💥, bug 🐞, ci 🤖, documentation 📝, enhancement ✨,
+            security 🛡️, refactor ♻️, performance 🚀, new-feature 🎉, triage 📑,
+            maintenance 📈, in-progress ⚡, dependencies 📦, submodules ⚙️"
           disable-reviews: true
