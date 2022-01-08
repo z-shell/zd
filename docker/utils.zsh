@@ -24,14 +24,10 @@ zi::setup-annexes() {
     @annexes
 }
 
-zi::setup-annexes2() {
-  z-shell/z-a-bin-gem-node \
-    z-shell/z-a-default-ice \
-    z-shell/z-a-patch-dl \
-    z-shell/z-a-readurl \
-    z-shell/z-a-rust \
-    z-shell/z-a-submods \
-    z-shell/z-a-unscope
+zi::setup-annexes+rec() {
+  zi light-mode compile'*handler' for \
+    z-shell/z-a-meta-plugins \
+    @annexes+rec
 }
 
 zi::setup-annexes-extra() {
