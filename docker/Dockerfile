@@ -22,13 +22,8 @@ adduser -D -s /bin/zsh -u "${PUID}" -h "/home/${PUSERNAME}" \
 "${PUSERNAME}" && printf "${PUSERNAME} ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/user && \
 mkdir -p /src /data /data-static && chown -R "${PUID}:${PGID}" /data /data-static
 
-RUN if [ -f /src/docker/zshenv ]; then \
-  ln -sfv /src/docker/zshenv /home/${PUSERNAME}/.zshenv; \
-  fi 
-
-RUN if [ -f /src/docker/zshrc ]; then \
-  ln -sfv /src/docker/zshrc /home/${PUSERNAME}/.zshrc; \
-  fi
+RUN ln -sfv /src/docker/zshenv /home/${PUSERNAME}/.zshenv && \
+    ln -sfv /src/docker/zshrc /home/${PUSERNAME}/.zshrc
 
 RUN if [ -f /home/${PUSERNAME}/bootstrap.sh ]; then \
   chmod u+x /home/${PUSERNAME}/bootstrap.sh; \
