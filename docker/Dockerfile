@@ -8,22 +8,26 @@ ARG TERM=xterm-256color
 ARG ZI_ZSH_VERSION
 
 ENV PUSERNAME=${PUSERNAME} PUID=${PUID} PGID=${PGID} \
-    SHELL=/bin/zsh TERM=${TERM} ZI_ZSH_VERSION=${ZI_ZSH_VERSION}
+SHELL=/bin/zsh TERM=${TERM} ZI_ZSH_VERSION=${ZI_ZSH_VERSION}
 
 RUN apk --no-cache --virtual base add \
-    coreutils curl git libuser rsync sudo zsh && \
-    apk --no-cache --virtual zsh-build-tools add \
-    autoconf bash build-base ncurses-dev && \
-    apk --no-cache --virtual dev-tools add \
-    go jq nodejs-dev npm ruby-dev neovim
+  coreutils curl git libuser rsync sudo zsh && \
+  apk --no-cache --virtual zsh-build-tools add \
+  autoconf bash build-base ncurses-dev && \
+  apk --no-cache --virtual dev-tools add \
+  go jq nodejs-dev npm ruby-dev neovim
 
 RUN sed -ir 's#^(root:.+):/bin/ash#\1:/bin/zsh#' /etc/passwd && \
-    adduser -D -s /bin/zsh -u "${PUID}" -h "/home/${PUSERNAME}" \
-    "${PUSERNAME}" && printf "${PUSERNAME} ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/user && \
-    mkdir -p /src /data /data-static && \
-    chown -R "${PUID}:${PGID}" /data /data-static && \
-    ln -sfv /src/docker/zshenv /home/${PUSERNAME}/.zshenv && \
-    ln -sfv /src/docker/zshrc /home/${PUSERNAME}/.zshrc
+adduser -D -s /bin/zsh -u "${PUID}" -h "/home/${PUSERNAME}" \
+"${PUSERNAME}" && printf "${PUSERNAME} ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/user && \
+mkdir -p /src /data /data-static && chown -R "${PUID}:${PGID}" /data /data-static
+
+RUN [ -f /src/docker/zshenv ] && ln -sfv /src/docker/zshenv /home/${PUSERNAME}/.zshenv
+RUN [ -f /src/docker/zshrc ] && ln -sfv /src/docker/zshrc /home/${PUSERNAME}/.zshrc
+RUN if [ -f /home/${PUSERNAME}/bootstrap.sh ]; then \
+  chmod u+x /home/${PUSERNAME}/bootstrap.sh; \
+  /home/${PUSERNAME}/bootstrap.sh; \
+  fi
 
 WORKDIR /home/${PUSERNAME}
 VOLUME ["/src", "/data"]
