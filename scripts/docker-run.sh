@@ -142,12 +142,10 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
       CONTAINER_TAG="$2"
       shift 2
       ;;
-    # Additional container env vars
     -e | --env | --environment)
       CONTAINER_ENV+=("$2")
       shift 2
       ;;
-    # Additional container volumes
     -v | --volume)
       CONTAINER_VOLUMES+=("$2")
       shift 2
@@ -199,7 +197,7 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     CONTAINER_VOLUMES+=(
       "${GIT_ROOT_DIR}:/src"
       "${TMPDIR:-/tmp}/ZZUnit:/data"
-      # TODO DIRTYFIX TO BE REMOVED BEFORE MERGING
+      # TODO: DIRTYFIX TO BE REMOVED BEFORE MERGING
       "${ROOT_DIR}/docker/zshenv:/home/user01/.zshenv"
       "${ROOT_DIR}/docker/zshrc:/home/user01/.zshrc"
     )
@@ -208,6 +206,5 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
       "NOTHING_FANCY=1"
     )
   fi
-
   run "$INIT_CONFIG" "$@"
 fi
