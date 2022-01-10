@@ -1,6 +1,19 @@
 #!/usr/bin/env zsh
 
-zi::setup() {
+zi::install() {
+  sh -c "$(curl -fsSF https://raw.githubusercontent.com/z-shell/zi-src/main/lib/sh/install.sh)" -- -i skip
+}
+
+zi::prepare() {
+  printf '%s\n' "Setting owner of /data to ${PUID}:${PGID}" >&2
+  sudo chown "${PUID}:${PGID}" /data
+  sudo chown -R "${PUID}:${PGID}" /data
+
+  printf '%s\n' "Copying files from /data-static to /data" >&2
+  rsync -raq /static/ /data
+}
+
+zi::init() {
   source /src/zi/zi.zsh
 }
 
@@ -20,24 +33,18 @@ zi::setup-keys() {
 
 zi::setup-annexes() {
   zi light-mode compile'*handler' for \
-    z-shell/z-a-meta-plugins \
-    @annexes
+    z-shell/z-a-meta-plugins @annexes
 }
 
 zi::setup-annexes+rec() {
   zi light-mode compile'*handler' for \
-    z-shell/z-a-meta-plugins \
-    @annexes+rec
+    z-shell/z-a-meta-plugins @annexes+rec
 }
 
-zi::setup-annexes-extra() {
-  # Dependencies
+zi::setup-annexes+add() {
   sudo apk add ruby-dev grep tree
   zi::install-zsdoc
-
-  zi light-mode compile'*handler' for \
-    z-shell/z-a-man \
-    z-shell/z-a-test
+  zi light-mode compile'*handler' for z-shell/z-a-test
 }
 
 zi::install-zsdoc() {

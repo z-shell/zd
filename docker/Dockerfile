@@ -1,42 +1,39 @@
 ARG VERSION=latest
 FROM alpine:${VERSION}
 
-ARG PUSERNAME=user01
+ARG ZUSER=z-dev
 ARG PUID=1000
 ARG PGID=1000
 ARG TERM=xterm-256color
 ARG ZI_ZSH_VERSION
+ARG APK_ADD
 
-ENV PUSERNAME=${PUSERNAME} PUID=${PUID} PGID=${PGID} \
-SHELL=/bin/zsh TERM=${TERM} ZI_ZSH_VERSION=${ZI_ZSH_VERSION}
+ENV ZUSER=${ZUSER} PUID=${PUID} PGID=${PGID} APK_ADD=${APK_ADD} \
+  SHELL=/bin/zsh TERM=${TERM} ZI_ZSH_VERSION=${ZI_ZSH_VERSION}
 
-RUN apk --no-cache --virtual base add \
-  coreutils curl git libuser rsync sudo zsh && \
-  apk --no-cache --virtual zsh-build-tools add \
-  autoconf bash build-base ncurses-dev && \
-  apk --no-cache --virtual dev-tools add \
-  go jq nodejs-dev npm ruby-dev neovim
+RUN apk --no-cache --virtual base add coreutils curl jq git libuser rsync sudo zsh && \
+  apk --no-cache --virtual zsh-build-tools add autoconf bash build-base ncurses-dev pcre-dev zlib-dev
 
 RUN sed -ir 's#^(root:.+):/bin/ash#\1:/bin/zsh#' /etc/passwd && \
-adduser -D -s /bin/zsh -u "${PUID}" -h "/home/${PUSERNAME}" \
-"${PUSERNAME}" && printf "${PUSERNAME} ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/user && \
-mkdir -p /src /data /data-static && chown -R "${PUID}:${PGID}" /data /data-static
+  adduser -D -s /bin/zsh -u "${PUID}" -h "/home/${ZUSER}" "${ZUSER}" && \
+  printf "${ZUSER} ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/user && \
+  mkdir -p /src /data /static && chown -R "${PUID}:${PGID}" /data /static
 
-RUN ln -sfv /src/docker/zshenv /home/${PUSERNAME}/.zshenv && \
-    ln -sfv /src/docker/zshrc /home/${PUSERNAME}/.zshrc
+RUN ln -sfv /src/docker/zshenv /home/${ZUSER}/.zshenv && \
+  ln -sfv /src/docker/zshrc /home/${ZUSER}/.zshrc
 
-RUN if [ -f /home/${PUSERNAME}/bootstrap.sh ]; then \
-  chmod u+x /home/${PUSERNAME}/bootstrap.sh; \
-  /home/${PUSERNAME}/bootstrap.sh; \
+RUN if [ -f /home/${ZUSER}/bootstrap.sh ]; then \
+  chmod u+x /home/${ZUSER}/bootstrap.sh; \
+  /home/${ZUSER}/bootstrap.sh; \
   fi
 
-WORKDIR /home/${PUSERNAME}
+WORKDIR /home/${ZUSER}
 VOLUME ["/src", "/data"]
 
-COPY --chown=${PUSERNAME} . /src
+COPY --chown=${ZUSER} . /src
 
-USER ${PUSERNAME}
+USER ${ZUSER}
 
-RUN ZI_HOME_DIR=/data-static ZSH_NO_INIT=1 zsh -ils -c -- '@zi-scheduler burst'
+RUN ZI_HOME_DIR=/static zsh -ils -c -- '@zi-scheduler burst'
 
 CMD ["/bin/zsh"]

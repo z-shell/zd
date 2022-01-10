@@ -1,31 +1,18 @@
-# Initialization. Trigger stuff that only needs to be run once, at startup.
-if [[ "$$" == 1 ]] && [[ -z "$ZSH_NO_INIT" ]]
-then
-  source /src/docker/init.zsh
-fi
+source /src/docker/utils.zsh
 
-source /src/zi/zi.zsh
+zi::install
+
 autoload -Uz _zi
 (( ${+_comps} )) && _comps[zi]=_zi
 
-source /src/docker/utils.zsh
+zi::init
 
 typeset -U path
 path=("${ZPFX:-${HOME}/.zi/polaris}/bin" "${HOME}/go/bin" $path)
 
-# Install custom zsh version
 if [[ -n "$ZI_ZSH_VERSION" ]]
 then
   zi::pack-zsh "$ZI_ZSH_VERSION"
 fi
 
-source /src/docker/zshrc-fancy
-
-# Source init file
-INIT_FILE="/init.zsh"
-if [[ -r "$INIT_FILE" ]]
-then
-  source "$INIT_FILE"
-fi
-
-# vim: ft=zsh et ts=2 sw=2 :
+zi::prepare
