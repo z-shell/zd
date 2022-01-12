@@ -9,7 +9,7 @@ zi::prepare() {
   sudo chown "${PUID}:${PGID}" /data
   sudo chown -R "${PUID}:${PGID}" /data
 
-  printf '%s\n' "Copying files from /data-static to /data" >&2
+  printf '%s\n' "Copying files from /static to /data" >&2
   rsync -raq /static/ /data
 }
 
