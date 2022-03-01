@@ -41,7 +41,7 @@ create_init_config_file() {
 }
 
 run() {
-  local image="${CONTAINER_IMAGE:-ghcr.io/z-shell/zzd}"
+  local image="${CONTAINER_IMAGE:-ghcr.io/z-shell/zd}"
   local tag="${CONTAINER_TAG:-latest}"
   local init_config="$1"
   shift
@@ -56,7 +56,7 @@ run() {
     if [[ -r "$init_config" ]]; then
       args+=(--volume "${init_config}:/init.zsh")
     else
-      echo "❌ Init config file is not readable" >&2
+      echo "Init config file is not readable" >&2
       return 1
     fi
   fi
@@ -98,7 +98,7 @@ run() {
 }
 
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
-  CONTAINER_IMAGE=${CONTAINER_IMAGE:-ghcr.io/z-shell/zzd}
+  CONTAINER_IMAGE=${CONTAINER_IMAGE:-ghcr.io/z-shell/zd}
   CONTAINER_TAG="${CONTAINER_TAG:-latest}"
   CONTAINER_ENV=()
   CONTAINER_VOLUMES=()
@@ -159,7 +159,7 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
       ZUNIT=1
       shift
       ;;
-    # Whether to enable debug tracing of zzd (zsh -x)
+    # Whether to enable debug tracing of zd (zsh -x)
     # Only applies to wrapped commands (--w|--wrap)
     --zsh-debug | -x | -Z)
       ZSH_DEBUG=1
@@ -193,13 +193,13 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
       pwd -P
     )" || exit 9
     # Mount root of the repo to /src
-    # Mount /tmp/zunit-zzd to /data
+    # Mount /tmp/zunit-zd to /data
     CONTAINER_VOLUMES+=(
       "${GIT_ROOT_DIR}:/src"
       "${TMPDIR:-/tmp}/ZZUnit:/data"
       # TODO: DIRTYFIX TO BE REMOVED BEFORE MERGING
-      "${ROOT_DIR}/docker/zshenv:/home/user01/.zshenv"
-      "${ROOT_DIR}/docker/zshrc:/home/user01/.zshrc"
+      "${ROOT_DIR}/docker/zshenv:/home/z-dev/.zshenv"
+      "${ROOT_DIR}/docker/zshrc:/home/z-dev/.zshrc"
     )
     CONTAINER_ENV+=(
       "QUIET=1"
