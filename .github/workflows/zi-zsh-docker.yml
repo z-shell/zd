@@ -63,6 +63,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          submodules: recursive
+          repository: 'z-shell/zd'  
       - uses: rlespinasse/github-slug-action@v4
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
