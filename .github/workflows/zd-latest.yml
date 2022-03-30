@@ -1,6 +1,6 @@
 ---
 name: ZD Latest
-on: ['push', 'workflow_call']
+on: ['workflow_call']
 
 jobs:
   build-latest:
