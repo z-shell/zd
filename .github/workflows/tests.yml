@@ -38,7 +38,7 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           submodules: recursive
-
+          repository: 'z-shell/zd'  
       - name: "Install dependencies"
         run: |
           sudo apt install -y zsh
