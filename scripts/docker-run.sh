@@ -183,7 +183,7 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
   if [[ -n "$DEVEL" ]]; then
     # Mount root of the repo to /src
     CONTAINER_VOLUMES+=(
-      "${GIT_ROOT_DIR}:/src/zi"
+      "${GIT_ROOT_DIR}:/src"
     )
   fi
 
@@ -195,7 +195,7 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     # Mount root of the repo to /src
     # Mount /tmp/zunit-zd to /data
     CONTAINER_VOLUMES+=(
-      "${GIT_ROOT_DIR}:/src/zi"
+      "${GIT_ROOT_DIR}:/src"
       "${TMPDIR:-/tmp}/ZZUnit:/data"
       # TODO: DIRTYFIX TO BE REMOVED BEFORE MERGING
       "${ROOT_DIR}/docker/zshenv:/home/z-dev/.zshenv"
