@@ -1,7 +1,7 @@
 #!/usr/bin/env zsh
 
 zi::install() {
-  sh -c "$(curl -fsSF https://raw.githubusercontent.com/z-shell/zi-src/main/lib/sh/install.sh)" -- -i skip
+  sh -c "$(curl -fsSL https://raw.githubusercontent.com/z-shell/zi-src/main/lib/sh/install.sh)" -- -i skip
 }
 
 zi::prepare() {
