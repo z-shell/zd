@@ -4,8 +4,7 @@ name: ✅ Zsh Check
 on:
   pull_request:
     paths:
-      - "./zi.zsh"
-      - "lib/**"
+      - "./zi/**"
 
 jobs:
   build-matrix:
