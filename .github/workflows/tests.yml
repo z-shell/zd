@@ -12,7 +12,8 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          repository: 'z-shell/zd'  
+          token: ${{ secrets.GITHUB_TOKEN }}
+          submodules: recursive
       - name: "Set matrix output"
         id: set-matrix
         run: |
