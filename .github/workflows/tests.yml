@@ -1,4 +1,4 @@
-name: ZUnit
+name: '✅ ZUnit'
 on: 
   workflow_call:
   workflow_dispatch:
