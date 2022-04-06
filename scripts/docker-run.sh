@@ -203,7 +203,6 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     )
     CONTAINER_ENV+=(
       "QUIET=1"
-      "NOTHING_FANCY=1"
     )
   fi
   run "$INIT_CONFIG" "$@"
