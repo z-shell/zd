@@ -51,7 +51,7 @@ jobs:
           push: ${{ github.event.number == 0 }}
           file: ./docker/Dockerfile
           build-args: |
-            ZI_ZSH_VERSION=${{ matrix.zsh_version }}-tcsetpgrp
+            ZI_ZSH_VERSION=${{ matrix.zsh_version }}
           tags: |
             ghcr.io/${{ github.repository }}:zsh-${{ matrix.zsh_version }}
             ghcr.io/${{ github.repository }}:zsh-${{ matrix.zsh_version }}-${{ env.GITHUB_SHA_SHORT }}
