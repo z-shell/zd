@@ -51,6 +51,7 @@ jobs:
           push: ${{ github.event.number == 0 }}
           file: ./docker/Dockerfile
           build-args: |
+            VERSION=edge
             ZI_ZSH_VERSION=${{ matrix.zsh_version }}
           tags: |
             ghcr.io/${{ github.repository }}:zsh-${{ matrix.zsh_version }}
