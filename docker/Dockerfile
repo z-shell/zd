@@ -1,4 +1,4 @@
-ARG VERSION=edge
+ARG VERSION=latest
 FROM alpine:${VERSION}
 
 ARG ZUSER=z-dev
@@ -11,7 +11,7 @@ ARG APK_ADD
 ENV ZUSER=${ZUSER} PUID=${PUID} PGID=${PGID} APK_ADD=${APK_ADD} \
   SHELL=/bin/zsh TERM=${TERM} ZI_ZSH_VERSION=${ZI_ZSH_VERSION}
 
-RUN apk --no-cache --virtual base add coreutils curl jq git libuser rsync sudo zsh ncurses-dev pcre-dev zlib-dev yodl && \
+RUN apk --no-cache --virtual base add coreutils curl jq git libuser rsync sudo zsh ncurses-dev pcre-dev zlib-dev && \
   apk --no-cache --virtual zsh-build-tools add autoconf bash build-base go vim
 
 RUN sed -ir 's#^(root:.+):/bin/ash#\1:/bin/zsh#' /etc/passwd && \
