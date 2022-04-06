@@ -17,11 +17,11 @@ RUN apk --no-cache --virtual base add coreutils curl jq git libuser rsync sudo z
 RUN sed -ir 's#^(root:.+):/bin/ash#\1:/bin/zsh#' /etc/passwd && \
   adduser -D -s /bin/zsh -u "${PUID}" -h "/home/${ZUSER}" "${ZUSER}" && \
   printf "${ZUSER} ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/user && \
-  mkdir -p /src/zi /data /static && chown -R "${PUID}:${PGID}" /src /data /static
+  mkdir -p /src/zi/bin /data /static && chown -R "${PUID}:${PGID}" /src /data /static
 
 RUN ln -sfv /src/docker/zshenv /home/${ZUSER}/.zshenv && \
   ln -sfv /src/docker/zshrc /home/${ZUSER}/.zshrc && \
-  ln -sfv /src/zi /home/${ZUSER}/.zi
+  ln -sfv /src/zi /home/${ZUSER}/.zi/bin
 
 RUN if [ -f /home/${ZUSER}/bootstrap.sh ]; then \
   chmod u+x /home/${ZUSER}/bootstrap.sh; \
