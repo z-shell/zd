@@ -1,9 +1,5 @@
 #!/usr/bin/env zsh
 
-zi::install() {
-  sh -c "$(curl -fsSL https://raw.githubusercontent.com/z-shell/zi-src/main/lib/sh/install.sh)" -- -i skip
-}
-
 zi::prepare() {
   printf '%s\n' "Setting owner of /data to ${PUID}:${PGID}" >&2
   sudo chown "${PUID}:${PGID}" /data
@@ -11,6 +7,10 @@ zi::prepare() {
 
   printf '%s\n' "Copying files from /static to /data" >&2
   rsync -raq /static/ /data
+}
+
+zi::install() {
+  sh -c "$(curl -fsSL https://raw.githubusercontent.com/z-shell/zi-src/main/lib/sh/install.sh)" -- -i skip
 }
 
 zi::init() {
