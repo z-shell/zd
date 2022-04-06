@@ -6,7 +6,7 @@ build() {
     pwd -P
   )" || exit 9
 
-  local image_name="${1:-zzd}"
+  local image_name="${1:-zd}"
   local tag="${2:-latest}"
   local zsh_version="${3}"
   shift 3
@@ -27,7 +27,7 @@ build() {
     --build-arg "PUID=$(id -u)" \
     --build-arg "PGID=$(id -g)" \
     --build-arg "TERM=${TERM:-xterm-256color}" \
-    --build-arg "ZINIT_ZSH_VERSION=${zsh_version}" \
+    --build-arg "ZI_ZSH_VERSION=${zsh_version}" \
     --file "$dockerfile" \
     --tag "${image_name}:${tag}" \
     "${args[@]}" \
@@ -38,14 +38,14 @@ build() {
       echo -e "\e[34mzunit run --verbose\e[0m"
     } >&2
   else
-    echo -e "\e[31m❌ Container failed to build.\e[0m" >&2
+    echo -e "\e[31mContainer failed to build.\e[0m" >&2
     return 1
   fi
 }
 
 if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
   BUILD_ZSH_VERSION="${BUILD_ZSH_VERSION:-}"
-  CONTAINER_IMAGE="${CONTAINER_IMAGE:-ghcr.io/z-shell/zzd}"
+  CONTAINER_IMAGE="${CONTAINER_IMAGE:-ghcr.io/z-shell/zd}"
   CONTAINER_TAG="${CONTAINER_TAG:-latest}"
   NO_CACHE="${NO_CACHE:-}"
 
