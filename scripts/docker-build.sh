@@ -23,7 +23,7 @@ build() {
   [[ -n "$NO_CACHE" ]] && args+=(--no-cache "$@")
 
   if docker build \
-    --build-arg "PUSERNAME=$(id -u -n)" \
+    --build-arg "ZUSER=$(id -u -n)" \
     --build-arg "PUID=$(id -u)" \
     --build-arg "PGID=$(id -g)" \
     --build-arg "TERM=${TERM:-xterm-256color}" \
