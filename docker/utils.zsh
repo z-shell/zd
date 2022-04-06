@@ -14,15 +14,15 @@ zi::install() {
 }
 
 zi::init() {
-  source ~/.zi/zi.zsh
+  source ~/.zi/bin/zi.zsh
 }
 
 zi::reload() {
   local zf1 zf2
-  for zf1 in ~/.zi/*.zsh; do
+  for zf1 in ~/.zi/bin/*.zsh; do
     source "$zf1"
   done
-  for zf2 in ~/.zi/lib/zsh/*.zsh; do
+  for zf2 in ~/.zi/bin/lib/zsh/*.zsh; do
     source "$zf2"
   done
 }
