@@ -1,5 +1,6 @@
 source /src/docker/utils.zsh
 
+zi::prepare
 zi::install
 
 autoload -Uz _zi
@@ -14,5 +15,3 @@ if [[ -n "$ZI_ZSH_VERSION" ]]
 then
   zi::pack-zsh "$ZI_ZSH_VERSION"
 fi
-
-zi::prepare
