@@ -10,7 +10,7 @@ jobs:
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}
     container:
-      image: z-shell/zd
+      image: ghcr.io/z-shell/zd
     steps:
          - name: Log the node version
            working-directory: .
