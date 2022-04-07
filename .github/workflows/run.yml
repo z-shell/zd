@@ -10,7 +10,7 @@ jobs:
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}
     container:
-      image: ghcr.io/z-shell/zd:latest
+      image: ghcr.io/z-shell/zd:zsh-5.8.1
     steps:
          - name: Run
            working-directory: .
