@@ -15,7 +15,5 @@ jobs:
          - name: Log the node version
            working-directory: .
            run: |
-             docker run --rm --env --volume "${GIT_ROOT_DIR}:/src" \
-             --volume "${TMPDIR:-/tmp}/ZZUnit:/data" --volume "${ROOT_DIR}/docker/zshenv:/home/z-dev/.zshenv" \
-             --volume "${ROOT_DIR}/docker/zshrc:/home/z-dev/.zshrc"
+             zi update
              
