@@ -10,9 +10,9 @@ jobs:
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}
     container:
-      image: ghcr.io/z-shell/zd
+      image: ghcr.io/z-shell/zd:latest
     steps:
-         - name: Log the node version
+         - name: Run
            working-directory: .
            run: |
              zi update
