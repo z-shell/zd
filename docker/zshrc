@@ -1,12 +1,17 @@
 source /src/docker/utils.zsh
 zi::prepare
-typeset -U path
-path=("${ZPFX:-${HOME}/.zi/polaris}/bin" "${HOME}/go/bin" $path)
 zi::install
 zi::module
+typeset -U path
+path=("${ZPFX:-${HOME}/.zi/polaris}/bin" "${HOME}/go/bin" $path)
+module_path+=( /data/zmodules/zpmod/Src )
 zi::init
+zmodload zi/zpmod &>/dev/null
 autoload -Uz _zi
 (( ${+_comps} )) && _comps[zi]=_zi
+
 if [[ -n "$ZI_ZSH_VERSION" ]]; then
   zi::pack-zsh "$ZI_ZSH_VERSION"
 fi
+
+zi::reload
