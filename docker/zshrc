@@ -14,4 +14,4 @@ if [[ -n "$ZI_ZSH_VERSION" ]]; then
   zi::pack-zsh "$ZI_ZSH_VERSION"
 fi
 
-zi::reload
+zi::setup-minimal
