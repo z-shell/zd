@@ -32,19 +32,19 @@ zi::setup-keys() {
 }
 
 zi::setup-annexes() {
-  zi light-mode compile'*handler' for \
+  zi light-mode for \
     z-shell/z-a-meta-plugins @annexes
 }
 
 zi::setup-annexes+rec() {
-  zi light-mode compile'*handler' for \
+  zi light-mode for \
     z-shell/z-a-meta-plugins @annexes+rec
 }
 
 zi::setup-annexes+add() {
   sudo apk add ruby-dev grep tree
   zi::install-zsdoc
-  zi light-mode compile'*handler' for z-shell/z-a-test
+  zi light-mode for z-shell/z-a-test
 }
 
 zi::install-zsdoc() {
