@@ -198,8 +198,8 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
       "${GIT_ROOT_DIR}:/src"
       "${TMPDIR:-/tmp}/ZZUnit:/data"
       # TODO: DIRTYFIX TO BE REMOVED BEFORE MERGING
-      "${ROOT_DIR}/docker/zshenv:/home/z-dev/.zshenv"
-      "${ROOT_DIR}/docker/zshrc:/home/z-dev/.zshrc"
+      #"${ROOT_DIR}/docker/zshenv:/home/z-dev/.zshenv"
+      #"${ROOT_DIR}/docker/zshrc:/home/z-dev/.zshrc"
     )
     CONTAINER_ENV+=(
       "QUIET=1"
