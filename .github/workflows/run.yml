@@ -10,9 +10,10 @@ jobs:
     concurrency:
       group: ${{ github.workflow }}-${{ github.ref }}
     container:
-      image: ghcr.io/z-shell/zd:zsh-5.8.1
+      image: ghcr.io/z-shell/zd:latest
+      volumes:
+        - /home/runner/work/zd/zd:/src
+        - /tmp/ZZUnit:/data  
     steps:
-         - name: Run
-           working-directory: .
-           run: docker run --rm --env TERM=xterm --env QUIET=1 --volume /home/runner/work/zd/zd:/src --volume /tmp/ZZUnit:/data ghcr.io/z-shell/zd:latest 'zsh' '-ilsc' 'zi light z-shell/z-a-bin-gem-node'
-             
+      - run: zi light z-shell/z-a-bin-gem-node'
+        shell: zsh {0}             
