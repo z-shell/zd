@@ -1,14 +1,12 @@
 source /src/docker/utils.zsh
 zi::prepare
-zi::install
-
 typeset -U path
 path=("${ZPFX:-${HOME}/.zi/polaris}/bin" "${HOME}/go/bin" $path)
+zi::install
+zi::module
 zi::init
 autoload -Uz _zi
 (( ${+_comps} )) && _comps[zi]=_zi
 if [[ -n "$ZI_ZSH_VERSION" ]]; then
   zi::pack-zsh "$ZI_ZSH_VERSION"
 fi
-zi::setup-annexes
-zi::setup-minimal
