@@ -33,9 +33,9 @@ build() {
     "${args[@]}" \
     "$(realpath ..)"; then
     {
-      echo -e "\e[34mTo use this image for zunit tests run: \e[0m"
+      echo -e "\e[34mTo use this image for ZUnit tests run: \e[0m"
       echo -e "\e[34mexport CONTAINER_IMAGE=\"${image_name}\" CONTAINER_TAG=\"${tag}\"\e[0m"
-      echo -e "\e[34mzunit run --verbose\e[0m"
+      echo -e "\e[34mZUnit run --verbose\e[0m"
     } >&2
   else
     echo -e "\e[31mContainer failed to build.\e[0m" >&2
