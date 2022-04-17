@@ -26,5 +26,5 @@ RUN git clone https://github.com/z-shell/zi.git /home/${ZUSER}/.zi/bin && \
   cp -fv /src/docker/zshenv /home/${ZUSER}/.zshenv && \
   cp -fv /src/docker/zshrc /home/${ZUSER}/.zshrc
 
-RUN ZI_HOME_DIR=/home/${ZUSER}/.zi ZI_BIN_DIR=/home/${ZUSER}/.zi/bin zsh -ils -c -- 'zi module build; @zi-scheduler burst'
+RUN ZI_HOME_DIR=/home/${ZUSER}/.zi ZI_BIN_DIR=/home/${ZUSER}/.zi/bin zsh -ils -c -- '@zi-scheduler burst | true'
 CMD ["/bin/zsh", "-il"]
