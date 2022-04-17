@@ -13,6 +13,10 @@ zi::install() {
   sh -c "$(curl -fsSL https://raw.githubusercontent.com/z-shell/zi-src/main/lib/sh/install.sh)" -- -i skip
 }
 
+zi::module() {
+  sh -c "$(curl -fsSL https://raw.githubusercontent.com/z-shell/zi-src/main/lib/sh/install.sh)" -- -a zpmod
+}
+
 zi::init() {
   source ~/.zi/bin/zi.zsh
 }
