@@ -25,5 +25,5 @@ VOLUME ["/src", "/data"]
 COPY --chown=${ZUSER} . /src
 
 RUN git clone https://github.com/z-shell/zi.git /home/${ZUSER}/.zi/bin
-RUN ZI_HOME_DIR=/home/${ZUSER}/.zi ZI_BIN_DIR=/home/${ZUSER}/.zi/bin zsh -ils -c -- '@zi-scheduler burst | true'
-CMD ["/bin/zsh", "-il"]
+RUN ZI_HOME_DIR=/home/${ZUSER}/.zi ZI_BIN_DIR=/home/${ZUSER}/.zi/bin zsh -ils -c -- '@zi-scheduler burst'
+CMD ["/bin/zsh"]
