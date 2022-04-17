@@ -66,4 +66,5 @@ zi::setup-minimal() {
 zi::pack-zsh() {
   local version="$1"
   zi pack"$version" for zsh
+  zi pack for system-completions
 }
