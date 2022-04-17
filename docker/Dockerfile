@@ -17,14 +17,13 @@ RUN apk --no-cache --virtual base add coreutils curl jq git libuser rsync sudo z
   adduser -D -s /bin/zsh -u "${PUID}" -h "/home/${ZUSER}" "${ZUSER}" && \
   printf "${ZUSER} ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/user && \
   mkdir -p /src /data /static && chown -R "${PUID}:${PGID}" /src /data /static
+RUN cp -fv /src/docker/zshenv /home/${ZUSER}/.zshenv && \
+  cp -fv /src/docker/zshrc /home/${ZUSER}/.zshrc
 
 WORKDIR /home/${ZUSER}
 VOLUME ["/src", "/data"]
 COPY --chown=${ZUSER} . /src
 
-RUN git clone https://github.com/z-shell/zi.git /home/${ZUSER}/.zi/bin && \
-  cp -fv /src/docker/zshenv /home/${ZUSER}/.zshenv && \
-  cp -fv /src/docker/zshrc /home/${ZUSER}/.zshrc
-
+RUN git clone https://github.com/z-shell/zi.git /home/${ZUSER}/.zi/bin
 RUN ZI_HOME_DIR=/home/${ZUSER}/.zi ZI_BIN_DIR=/home/${ZUSER}/.zi/bin zsh -ils -c -- '@zi-scheduler burst | true'
 CMD ["/bin/zsh", "-il"]
