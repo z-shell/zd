@@ -197,8 +197,8 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     CONTAINER_VOLUMES+=(
       "${GIT_ROOT_DIR}:/src"
       "${TMPDIR:-/tmp}/ZZUnit:/data"
-      "${ROOT_DIR}/docker:/home/z-user"
-      #"${ROOT_DIR}/docker/zshrc:/home/z-dev/.zshrc"
+      "${ROOT_DIR}/docker/zshenv:/home/z-user/.zshenv"
+      "${ROOT_DIR}/docker/zshrc:/home/z-user/.zshrc"
     )
     CONTAINER_ENV+=(
       "QUIET=1"
