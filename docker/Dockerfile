@@ -17,8 +17,8 @@ RUN apk --no-cache --virtual base add coreutils curl jq git libuser rsync sudo z
   adduser -D -s /bin/zsh -u "${PUID}" -h "/home/${ZUSER}" "${ZUSER}" && \
   printf "${ZUSER} ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/user && \
   mkdir -p /src /data /static && chown -R "${PUID}:${PGID}" /src /data /static
-RUN cp -fv /src/docker/zshenv /home/${ZUSER}/.zshenv && \
-  cp -fv /src/docker/zshrc /home/${ZUSER}/.zshrc
+RUN ln -fvs /src/docker/zshenv /home/${ZUSER}/.zshenv && \
+  ln -fvs /src/docker/zshrc /home/${ZUSER}/.zshrc
 
 WORKDIR /home/${ZUSER}
 VOLUME ["/src", "/data"]
