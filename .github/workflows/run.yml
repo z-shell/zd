@@ -15,5 +15,5 @@ jobs:
         - /home/runner/work/zd/zd:/src
         - /tmp/ZZUnit:/data  
     steps:
-    - run: soucre ~/.zi/bin/zi.zsh && zi self-update
+    - run: source ~/.zi/bin/zi.zsh && zi self-update
       shell: zsh {0}
