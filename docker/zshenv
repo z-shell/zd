@@ -5,4 +5,3 @@ typeset -Ag ZI
 export ZI[HOME_DIR]=${ZI_HOME_DIR:-/data}
 export ZI[BIN_DIR]=${ZI_BIN_DIR:-$HOME/.zi/bin}
 
-zi::install
