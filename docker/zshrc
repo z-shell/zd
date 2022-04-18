@@ -1,5 +1,6 @@
 source /src/docker/utils.zsh
 zi::prepare
+zi::install
 typeset -U path module_path
 path=("${ZPFX:-${HOME}/.zi/polaris}/bin" "${HOME}/go/bin" $path)
 module_path+=( /data/zmodules/zpmod/Src )
