@@ -1,5 +1,10 @@
 #!/usr/bin/env zunit
 
+#
+# -*- mode: zsh; sh-indentation: 2; indent-tabs-mode: nil; sh-basic-offset: 2; -*-
+# vim: ft=zsh sw=2 ts=2 et
+#
+
 teardown() {
   color cyan @teardown called
 
@@ -8,5 +13,3 @@ teardown() {
     sudo rm -rf "$DATA_DIR"
   }
 }
-
-# vim: set ft=zsh et ts=2 sw=2 : #
