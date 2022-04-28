@@ -33,26 +33,24 @@
   assert "$artifact" is_executable
 }
 
-#@test 'failing atclone ice' {
-#  local z=$'zi null atclone'\''echo "intentional failure"; return 255'\'' for z-shell/null'
-#  run ./scripts/docker-run.sh --wrap --debug --zunit $z
+@test 'failing atclone ice' {
+  local z=$'zi null atclone'\''echo "intentional failure"; return 255'\'' for z-shell/null'
+  run ./scripts/docker-run.sh --wrap --debug --zunit $z
 
-#  assert $state not_equal_to 0
-#  assert $state equals 255
-#  assert "$output" contains "intentional failure"
-#}
+  assert $state not_equal_to 0
+  assert $state equals 255
+  assert "$output" contains "intentional failure"
+}
 
-#@test 'failing atpull ice' {
-#  local z=$'zi id-as'\''atpull-fail'\'' null \
-#      atpull'\''echo "intentional failure"; return 255'\'' \
-#      run-atpull \
-#    for z-shell/null; \
-#    zi update atpull-fail'
-#  run ./scripts/docker-run.sh --wrap --debug --zunit $z
+@test 'failing atpull ice' {
+  local z=$'zi id-as'\''atpull-fail'\'' null \
+  atpull'\''echo "intentional failure"; return 255'\'' run-atpull \
+  for z-shell/null; zi update atpull-fail'
+  run ./scripts/docker-run.sh --wrap --debug --zunit $z
 
-#  assert $state equals 255
-#  assert "$output" contains "intentional failure"
-#}
+  assert $state equals 255
+  assert "$output" contains "intentional failure"
+}
 
 @test 'failing mv ice' {
   local z=$'zi as'\''command'\'' from'\''gh-r'\'' bpick'\''*musl*'\'' mv'\''DOES_NOT_EXIST* -> fd'\'' pick'\''fd/fd'\'' for @sharkdp/fd'
