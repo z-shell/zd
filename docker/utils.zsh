@@ -10,7 +10,7 @@ zi::prepare() {
 }
 
 zi::install() {
-  sh -c "$(curl -fsSL https://raw.githubusercontent.com/z-shell/zi-src/main/lib/sh/install.sh)" -- -a loader
+  sh -c "$(curl -fsSL https://raw.githubusercontent.com/z-shell/zi-src/main/lib/sh/install.sh)" -- -i skip
 }
 
 zi::module() {
@@ -18,9 +18,7 @@ zi::module() {
 }
 
 zi::init() {
-  if [[ -r "${XDG_CONFIG_HOME:-$HOME/.config}/zi/init.zsh" ]]; then
-    source "${XDG_CONFIG_HOME:-$HOME/.config}/zi/init.zsh" && zzinit
-  fi
+  source ~/.zi/bin/zi.zsh
 }
 
 zi::reload() {
