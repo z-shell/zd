@@ -10,7 +10,7 @@ zi::prepare() {
 }
 
 zi::install() {
-  sh -c "$(curl -fsSL https://raw.githubusercontent.com/z-shell/zi-src/main/lib/sh/install.sh)" -- -i skip
+  sh -c "$(curl -fsSL https://raw.githubusercontent.com/z-shell/zi-src/main/lib/sh/install.sh)" -- -a loader
 }
 
 zi::module() {
