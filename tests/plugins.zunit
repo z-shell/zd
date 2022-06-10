@@ -19,8 +19,8 @@
     zi lucid as="program" from="gh-r" for junegunn/fzf
 
   assert $state equals 0
-  assert "$output" contains "Downloading"
-  assert "$output" contains "Successfully extracted and assigned +x chmod to the file"
+  assert "$output" contains "Unpacking"
+  assert "$output" contains "Successfully"
 
   local artifact="${PLUGINS_DIR}/junegunn---fzf/fzf"
   assert "$artifact" is_file
