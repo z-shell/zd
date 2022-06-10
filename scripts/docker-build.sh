@@ -15,14 +15,14 @@ build() {
 
   local dockerfile="../docker/Dockerfile"
 
-  if [[ -n $zsh_version ]]; then
+  if [[ -n ${zsh_version} ]]; then
     tag="zsh${zsh_version}-${tag}"
   fi
 
   echo -e "\e[34mBuilding image: ${image_name}\e[0m" >&2
 
   local -a args
-  [[ -n $NO_CACHE ]] && args+=(--no-cache "$@")
+  [[ -n ${NO_CACHE} ]] && args+=(--no-cache "$@")
 
   if docker build \
     --build-arg "ZUSER=$(id -u -n)" \
@@ -30,7 +30,7 @@ build() {
     --build-arg "PGID=$(id -g)" \
     --build-arg "TERM=${TERM:-xterm-256color}" \
     --build-arg "ZI_ZSH_VERSION=${zsh_version}" \
-    --file "$dockerfile" \
+    --file "${dockerfile}" \
     --tag "${image_name}:${tag}" \
     "${args[@]}" \
     "$(realpath ..)"; then

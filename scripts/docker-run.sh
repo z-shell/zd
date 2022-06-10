@@ -6,13 +6,13 @@ parent_process() {
   local ppid pcmd
   ppid="$(ps -o ppid= -p "$$" | awk '{ print $1 }')"
 
-  if [[ -z $ppid ]]; then
+  if [[ -z ${ppid} ]]; then
     echo "Failed to determine parent process" >&2
     return 1
   fi
 
-  if pcmd="$(ps -o cmd= -p "$ppid")"; then
-    echo "$pcmd"
+  if pcmd="$(ps -o cmd= -p "${ppid}")"; then
+    echo "${pcmd}"
     return
   fi
 
@@ -20,7 +20,7 @@ parent_process() {
 }
 
 running_interactively() {
-  if [[ -n $CI ]]; then
+  if [[ -n ${CI} ]]; then
     return 1
   fi
 
@@ -38,8 +38,8 @@ create_init_config_file() {
   fi
 
   tempfile="$(mktemp)"
-  echo "$*" >"$tempfile"
-  echo "$tempfile"
+  echo "$*" >"${tempfile}"
+  echo "${tempfile}"
 }
 
 run() {
@@ -54,8 +54,8 @@ run() {
     args+=(--tty=true --interactive=true)
   fi
 
-  if [[ -n $init_config ]]; then
-    if [[ -r $init_config ]]; then
+  if [[ -n ${init_config} ]]; then
+    if [[ -r ${init_config} ]]; then
       args+=(--volume "${init_config}:/init.zsh")
     else
       echo "Init config file is not readable" >&2
@@ -64,7 +64,7 @@ run() {
   fi
 
   # Inherit TERM
-  if [[ -n $TERM ]]; then
+  if [[ -n ${TERM} ]]; then
     args+=(--env "TERM=${TERM}")
   fi
 
@@ -84,19 +84,19 @@ run() {
 
   local -a cmd=("$@")
 
-  if [[ -n $WRAP_CMD ]]; then
+  if [[ -n ${WRAP_CMD} ]]; then
     local zsh_opts="ilsc"
-    [[ -n $ZSH_DEBUG ]] && zsh_opts="x${zsh_opts}"
+    [[ -n ${ZSH_DEBUG} ]] && zsh_opts="x${zsh_opts}"
     cmd=(zsh "-${zsh_opts}" "${cmd[*]}")
   fi
 
-  if [[ -n $DEBUG ]]; then
+  if [[ -n ${DEBUG} ]]; then
     {
-      echo -e "\$ docker run ${args[*]} $image:$tag ${cmd[*]@Q}\e[0m"
+      echo -e "\$ docker run ${args[*]} ${image}:${tag} ${cmd[*]@Q}\e[0m"
     } >&2
   fi
 
-  docker run "${args[@]}" "$image:$tag" "${cmd[@]}"
+  docker run "${args[@]}" "${image}:${tag}" "${cmd[@]}"
 }
 
 if [[ ${BASH_SOURCE[0]} == "${0}" ]]; then
@@ -173,7 +173,7 @@ if [[ ${BASH_SOURCE[0]} == "${0}" ]]; then
     esac
   done
 
-  if INIT_CONFIG="$(create_init_config_file "$INIT_CONFIG_VAL")"; then
+  if INIT_CONFIG="$(create_init_config_file "${INIT_CONFIG_VAL}")"; then
     trap 'rm -vf $INIT_CONFIG' EXIT INT
   fi
 
@@ -182,14 +182,14 @@ if [[ ${BASH_SOURCE[0]} == "${0}" ]]; then
     pwd -P
   )" || exit 9
 
-  if [[ -n $DEVEL ]]; then
+  if [[ -n ${DEVEL} ]]; then
     # Mount root of the repo to /src
     CONTAINER_VOLUMES+=(
       "${GIT_ROOT_DIR}:/src"
     )
   fi
 
-  if [[ -n $ZUNIT ]]; then
+  if [[ -n ${ZUNIT} ]]; then
     ROOT_DIR="$(
       cd "$(dirname "$0")/.." >/dev/null 2>&1
       pwd -P
@@ -206,5 +206,5 @@ if [[ ${BASH_SOURCE[0]} == "${0}" ]]; then
       "QUIET=1"
     )
   fi
-  run "$INIT_CONFIG" "$@"
+  run "${INIT_CONFIG}" "$@"
 fi

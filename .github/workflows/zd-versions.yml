@@ -15,8 +15,6 @@ jobs:
           - 5.8
           - 5.8.1
           - 5.9
-          - HEAD
-
     steps:
       - uses: actions/checkout@v3
         with:
