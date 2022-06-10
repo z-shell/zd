@@ -29,11 +29,8 @@ RUN if [ -f /home/${ZUSER}/init.zsh ]; then \
 
 WORKDIR /home/${ZUSER}
 VOLUME ["/src", "/data"]
-
 COPY --chown=${ZUSER} . /src
-
 USER ${ZUSER}
-
-RUN ZI_HOME_DIR=/home/${ZUSER}/.zi ZI_BIN_DIR=/home/${ZUSER}/.zi/bin zsh -ils -c -- '@zi-scheduler burst'
-
-CMD ["/bin/zsh"]
+RUN ZI_HOME_DIR=/home/${ZUSER}/.zi ZI_BIN_DIR=/home/${ZUSER}/.zi/bin \
+SHELL=/bin/zsh zsh -i -lc -- '@zi-scheduler burst || true '
+CMD ["zsh", "-i", "-l"]
