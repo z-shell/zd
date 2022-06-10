@@ -1,5 +1,5 @@
 ---
-name: '🐋 ZD'
+name: "🐋 ZD"
 on: [push, workflow_dispatch, workflow_call]
 
 jobs:

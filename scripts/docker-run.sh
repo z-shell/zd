@@ -6,7 +6,7 @@ parent_process() {
   local ppid pcmd
   ppid="$(ps -o ppid= -p "$$" | awk '{ print $1 }')"
 
-  if [[ -z "$ppid" ]]; then
+  if [[ -z $ppid ]]; then
     echo "Failed to determine parent process" >&2
     return 1
   fi
@@ -20,7 +20,7 @@ parent_process() {
 }
 
 running_interactively() {
-  if [[ -n "$CI" ]]; then
+  if [[ -n $CI ]]; then
     return 1
   fi
 
@@ -33,7 +33,7 @@ running_interactively() {
 create_init_config_file() {
   local tempfile
 
-  if [[ -z "$*" ]]; then
+  if [[ -z $* ]]; then
     return 1
   fi
 
@@ -54,8 +54,8 @@ run() {
     args+=(--tty=true --interactive=true)
   fi
 
-  if [[ -n "$init_config" ]]; then
-    if [[ -r "$init_config" ]]; then
+  if [[ -n $init_config ]]; then
+    if [[ -r $init_config ]]; then
       args+=(--volume "${init_config}:/init.zsh")
     else
       echo "Init config file is not readable" >&2
@@ -64,18 +64,18 @@ run() {
   fi
 
   # Inherit TERM
-  if [[ -n "$TERM" ]]; then
+  if [[ -n $TERM ]]; then
     args+=(--env "TERM=${TERM}")
   fi
 
-  if [[ -n "${CONTAINER_ENV[*]}" ]]; then
+  if [[ -n ${CONTAINER_ENV[*]} ]]; then
     local e
     for e in "${CONTAINER_ENV[@]}"; do
       args+=(--env "${e}")
     done
   fi
 
-  if [[ -n "${CONTAINER_VOLUMES[*]}" ]]; then
+  if [[ -n ${CONTAINER_VOLUMES[*]} ]]; then
     local vol
     for vol in "${CONTAINER_VOLUMES[@]}"; do
       args+=(--volume "${vol}")
@@ -84,13 +84,13 @@ run() {
 
   local -a cmd=("$@")
 
-  if [[ -n "$WRAP_CMD" ]]; then
+  if [[ -n $WRAP_CMD ]]; then
     local zsh_opts="ilsc"
-    [[ -n "$ZSH_DEBUG" ]] && zsh_opts="x${zsh_opts}"
+    [[ -n $ZSH_DEBUG ]] && zsh_opts="x${zsh_opts}"
     cmd=(zsh "-${zsh_opts}" "${cmd[*]}")
   fi
 
-  if [[ -n "$DEBUG" ]]; then
+  if [[ -n $DEBUG ]]; then
     {
       echo -e "\$ docker run ${args[*]} $image:$tag ${cmd[*]@Q}\e[0m"
     } >&2
@@ -99,7 +99,7 @@ run() {
   docker run "${args[@]}" "$image:$tag" "${cmd[@]}"
 }
 
-if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+if [[ ${BASH_SOURCE[0]} == "${0}" ]]; then
   CONTAINER_IMAGE=${CONTAINER_IMAGE:-ghcr.io/z-shell/zd}
   CONTAINER_TAG="${CONTAINER_TAG:-latest}"
   CONTAINER_ENV=()
@@ -109,7 +109,7 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
   INIT_CONFIG_VAL="${INIT_CONFIG_VAL:-}"
   WRAP_CMD="${WRAP_CMD:-}"
 
-  while [[ -n "$*" ]]; do
+  while [[ -n $* ]]; do
     case "$1" in
     # Fetch init config from clipboard (Linux only)
     --xsel | -b)
@@ -121,7 +121,7 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
       shift 2
       ;;
     -f | --config-file | --init-config-file | --file)
-      if ! [[ -r "$2" ]]; then
+      if ! [[ -r $2 ]]; then
         echo "Unable to read from file: $2" >&2
         exit 2
       fi
@@ -182,14 +182,14 @@ if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
     pwd -P
   )" || exit 9
 
-  if [[ -n "$DEVEL" ]]; then
+  if [[ -n $DEVEL ]]; then
     # Mount root of the repo to /src
     CONTAINER_VOLUMES+=(
       "${GIT_ROOT_DIR}:/src"
     )
   fi
 
-  if [[ -n "$ZUNIT" ]]; then
+  if [[ -n $ZUNIT ]]; then
     ROOT_DIR="$(
       cd "$(dirname "$0")/.." >/dev/null 2>&1
       pwd -P

@@ -15,14 +15,14 @@ build() {
 
   local dockerfile="../docker/Dockerfile"
 
-  if [[ -n "$zsh_version" ]]; then
+  if [[ -n $zsh_version ]]; then
     tag="zsh${zsh_version}-${tag}"
   fi
 
   echo -e "\e[34mBuilding image: ${image_name}\e[0m" >&2
 
   local -a args
-  [[ -n "$NO_CACHE" ]] && args+=(--no-cache "$@")
+  [[ -n $NO_CACHE ]] && args+=(--no-cache "$@")
 
   if docker build \
     --build-arg "ZUSER=$(id -u -n)" \
@@ -45,13 +45,13 @@ build() {
   fi
 }
 
-if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+if [[ ${BASH_SOURCE[0]} == "${0}" ]]; then
   BUILD_ZSH_VERSION="${BUILD_ZSH_VERSION:-}"
   CONTAINER_IMAGE="${CONTAINER_IMAGE:-ghcr.io/z-shell/zd}"
   CONTAINER_TAG="${CONTAINER_TAG:-latest}"
   NO_CACHE="${NO_CACHE:-}"
 
-  while [[ -n "$*" ]]; do
+  while [[ -n $* ]]; do
     case "$1" in
     --image | -i)
       CONTAINER_IMAGE="$2"
