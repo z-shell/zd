@@ -27,19 +27,19 @@
   assert "$artifact" is_executable
 }
 
-@test 'zi direnv installation' {
-  run ./scripts/docker-run.sh --wrap --debug --zunit \
-    'zi light-mode as"program" \
-      atclone"go install github.com/cpuguy83/go-md2man/v2@latest" \
-      make for @direnv/direnv'
-
-  assert $state equals 0
-  assert "$output" contains "Downloading"
-  assert "$output" contains "go build  -o direnv"
-
-  local artifact="${PLUGINS_DIR}/direnv---direnv/direnv"
-  assert "$artifact" is_file
-  assert "$artifact" is_executable
-}
+#@test 'zi direnv installation' {
+#  run ./scripts/docker-run.sh --wrap --debug --zunit \
+#    'zi light-mode as"program" \
+#      atclone"go install github.com/cpuguy83/go-md2man/v2@latest" \
+#      make for @direnv/direnv'
+#
+#  assert $state equals 0
+#  assert "$output" contains "Downloading"
+#  assert "$output" contains "go build  -o direnv"
+#
+#  local artifact="${PLUGINS_DIR}/direnv---direnv/direnv"
+#  assert "$artifact" is_file
+#  assert "$artifact" is_executable
+#}
 
 # vim: set ft=zsh et ts=2 sw=2 : #
