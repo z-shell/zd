@@ -19,7 +19,7 @@
     zi snippet OMZL::spectrum.zsh
 
   assert $state equals 0
-  assert "$output" contains "Setting up snippet"
+  assert "$output" contains "Downloading"
 
   local artifact="${SNIPPETS_DIR}/OMZL::spectrum.zsh/OMZL::spectrum.zsh"
   assert "$artifact" is_file
@@ -31,7 +31,7 @@
     zi snippet OMZP::git
 
   assert $state equals 0
-  assert "$output" contains "Setting up snippet"
+  assert "$output" contains "Downloading"
 
   local artifact="${SNIPPETS_DIR}/OMZP::git/OMZP::git"
   assert "$artifact" is_file
@@ -43,7 +43,7 @@
     zi snippet PZTM::environment
 
   assert $state equals 0
-  assert "$output" contains "Setting up snippet"
+  assert "$output" contains "Downloading"
 
   local artifact="${SNIPPETS_DIR}/PZTM::environment/PZTM::environment"
   assert "$artifact" is_file
