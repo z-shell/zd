@@ -20,7 +20,7 @@
 
   assert $state equals 0
   assert "$output" contains "Downloading"
-  assert "$output" contains "Successfully extracted and assigned +x chmod"
+  assert "$output" contains "Successfully extracted and assigned +x chmod to the file"
 
   local artifact="${PLUGINS_DIR}/junegunn---fzf/fzf"
   assert "$artifact" is_file
