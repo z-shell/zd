@@ -35,7 +35,7 @@
 
   assert $state equals 0
   assert "$output" contains "Downloading"
-  assert "$output" contains "go: downloading github.com"
+  assert "$output" contains "go build  -o direnv"
 
   local artifact="${PLUGINS_DIR}/direnv---direnv/direnv"
   assert "$artifact" is_file
