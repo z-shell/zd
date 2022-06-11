@@ -9,28 +9,23 @@ ARG ZI_ZSH_VERSION
 ARG APK_ADD
 
 ENV ZUSER=${ZUSER} PUID=${PUID} PGID=${PGID} APK_ADD=${APK_ADD} \
-  SHELL=/bin/zsh TERM=${TERM} ZI_ZSH_VERSION=${ZI_ZSH_VERSION}
+SHELL=/bin/zsh TERM=${TERM} ZI_ZSH_VERSION=${ZI_ZSH_VERSION}
 
-RUN apk --no-cache --virtual base add coreutils curl jq git libuser rsync sudo zsh ncurses-dev pcre-dev zlib-dev && \
-  apk --no-cache --virtual zsh-build-tools add autoconf bash build-base go vim
+# trunk-ignore(hadolint/DL3018)
+RUN apk --no-cache --virtual base add coreutils curl jq git libuser rsync sudo zsh ncurses-dev pcre-dev zlib-dev \
+apk --no-cache --virtual zsh-build-tools add autoconf bash build-base go vim
 
-RUN sed -ir 's#^(root:.+):/bin/ash#\1:/bin/zsh#' /etc/passwd && \
-  adduser -D -s /bin/zsh -u "${PUID}" -h "/home/${ZUSER}" "${ZUSER}" && \
-  printf "${ZUSER} ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/user && \
-  mkdir -p /src /data /static && chown -R "${PUID}:${PGID}" /src /data /static
+COPY exec.sh /exec.sh
+RUN chmod +x /exec.sh && /exec.sh
 
-RUN ln -sfv /src/docker/zshenv /home/${ZUSER}/.zshenv && \
-  ln -sfv /src/docker/zshrc /home/${ZUSER}/.zshrc
-
-RUN if [ -f /home/${ZUSER}/init.zsh ]; then \
-  chmod u+x /home/${ZUSER}/init.zsh; \
-  /home/${ZUSER}/init.zsh; \
-  fi
-
-WORKDIR /home/${ZUSER}
 VOLUME ["/src", "/data"]
 COPY --chown=${ZUSER} . /src
+
 USER ${ZUSER}
+WORKDIR /home/${ZUSER}
+
 RUN ZI_HOME_DIR=/home/${ZUSER}/.zi ZI_BIN_DIR=/home/${ZUSER}/.zi/bin \
 SHELL=/bin/zsh zsh -i -lc -- '@zi-scheduler burst || true '
+
+ENTRYPOINT [ "/home/${ZUSER}/.zi/bin/zi.zsh" ]
 CMD ["zsh", "-i", "-l"]

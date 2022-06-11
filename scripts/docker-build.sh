@@ -1,10 +1,23 @@
 #!/usr/bin/env bash
-# -*- mode: zsh; sh-indentation: 2; indent-tabs-mode: nil; sh-basic-offset: 2; -*-
-# vim: ft=zsh sw=2 ts=2 et
+# -*- mode: bash; sh-indentation: 2; indent-tabs-mode: nil; sh-basic-offset: 2; -*-
+# vim: ft=bash sw=2 ts=2 et
+
+col_error="[31m"
+col_info="[32m"
+col_rst="[0m"
+
+say() {
+  printf '%s\n' "${col_info}${1}${col_rst}" >&2
+}
+
+err() {
+  say "${col_error}${1}${col_rst}" >&2
+  exit 1
+}
 
 build() {
-  cd "$(
-    cd "$(dirname "$0")" >/dev/null 2>&1
+  buildin cd "$(
+    buildin cd "$(dirname "$0")" >/dev/null 2>&1
     pwd -P
   )" || exit 9
 
@@ -19,7 +32,7 @@ build() {
     tag="zsh${zsh_version}-${tag}"
   fi
 
-  echo -e "\e[34mBuilding image: ${image_name}\e[0m" >&2
+  say "Building image: ${image_name}"
 
   local -a args
   [[ -n ${NO_CACHE} ]] && args+=(--no-cache "$@")
@@ -35,13 +48,12 @@ build() {
     "${args[@]}" \
     "$(realpath ..)"; then
     {
-      echo -e "\e[34mTo use this image for ZUnit tests run: \e[0m"
-      echo -e "\e[34mexport CONTAINER_IMAGE=\"${image_name}\" CONTAINER_TAG=\"${tag}\"\e[0m"
-      echo -e "\e[34mZUnit run --verbose\e[0m"
+      say "To use this image for ZUnit tests run: "
+      say "export CONTAINER_IMAGE=\"${image_name}\" CONTAINER_TAG=\"${tag}\""
+      say "ZUnit run --verbose"
     } >&2
   else
-    echo -e "\e[31mContainer failed to build.\e[0m" >&2
-    return 1
+    err "Container failed to build."
   fi
 }
 

@@ -8,10 +8,10 @@ on:
     branches: [main]
     tags: ["v*.*.*"]
     paths:
-      - 'docker/**'
-      - 'scripts/**'
-      - 'tests/**'
-      - 'lib/**'
+      - "docker/**"
+      - "scripts/**"
+      - "tests/**"
+      - "lib/**"
 
 jobs:
   build-versioned:
