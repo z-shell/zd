@@ -1,0 +1,27 @@
+#!/usr/bin/env zunit
+#
+# -*- mode: zsh; sh-indentation: 2; indent-tabs-mode: nil; sh-basic-offset: 2; -*-
+# vim: ft=zsh sw=2 ts=2 et
+#
+
+@setup {
+  load setup
+  setup
+}
+
+@teardown {
+  load teardown
+  teardown
+}
+
+@test 'zi package ls_colors' {
+  run ./scripts/docker-run.sh --wrap --debug --zunit \
+    zi pack for ls_colors
+
+  assert $state equals 0
+  assert "$output" contains "Package"
+
+  local artifact="${PLUGINS_DIR}/ls_colors/LS_COLORS"
+  assert "$artifact" is_file
+  assert "$artifact" is_readable
+}
