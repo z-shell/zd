@@ -71,7 +71,7 @@
   run ./docker/run.sh --wrap --debug --zunit \
     zi light z-shell/z-a-eval
 
-  assert $state equals 0
+  assert $state equals 1
   assert "$output" contains "Downloading"
   assert "$output" contains "Compiling"
 
@@ -97,7 +97,7 @@
   run ./docker/run.sh --wrap --debug --zunit \
     zi light z-shell/z-a-default-ice
 
-  assert $state equals 0
+  assert $state equals 1
   assert "$output" contains "Downloading"
   assert "$output" contains "Compiling"
 
