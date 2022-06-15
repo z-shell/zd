@@ -1,0 +1,52 @@
+#!/usr/bin/env zunit
+#
+# -*- mode: zsh; sh-indentation: 2; indent-tabs-mode: nil; sh-basic-offset: 2; -*-
+# vim: ft=zsh sw=2 ts=2 et
+#
+
+@setup {
+  load setup
+  setup
+}
+
+@teardown {
+  load teardown
+  teardown
+}
+
+@test 'z-a-bin-gem-node installation' {
+  run ./docker/run.sh --wrap --debug --zunit \
+    zi light z-shell/z-a-bin-gem-node
+
+  assert $state equals 0
+  assert "$output" contains "Downloading"
+
+  local artifact="${PLUGINS_DIR}/z-shell---z-a-bin-gem-node/z-a-bin-gem-node.plugin.zsh"
+  assert "$artifact" is_file
+  assert "$artifact" is_readable
+}
+
+@test 'z-a-meta-plugins installation' {
+  run ./docker/run.sh --wrap --debug --zunit \
+    zi light z-shell/z-a-meta-plugins
+
+  assert $state equals 0
+  assert "$output" contains "Downloading"
+
+  local artifact="${PLUGINS_DIR}/z-shell---z-a-meta-plugins/z-a-meta-plugins.plugin.zsh"
+  assert "$artifact" is_file
+  assert "$artifact" is_readable
+}
+
+
+@test 'z-a-readurl installation' {
+  run ./docker/run.sh --wrap --debug --zunit \
+    zi light z-shell/z-a-readurl
+
+  assert $state equals 0
+  assert "$output" contains "Downloading"
+
+  local artifact="${PLUGINS_DIR}/z-shell---z-a-readurl/z-a-readurl.plugin.zsh"
+  assert "$artifact" is_file
+  assert "$artifact" is_readable
+}

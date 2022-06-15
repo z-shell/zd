@@ -1,0 +1,51 @@
+#!/usr/bin/env zunit
+#
+# -*- mode: zsh; sh-indentation: 2; indent-tabs-mode: nil; sh-basic-offset: 2; -*-
+# vim: ft=zsh sw=2 ts=2 et
+#
+
+@setup {
+  load setup
+  setup
+}
+
+@teardown {
+  load teardown
+  teardown
+}
+
+@test 'zi OMZL::spectrum.zsh installation' {
+  run ./docker/run.sh --wrap --debug --zunit \
+    zi snippet OMZL::spectrum.zsh
+
+  assert $state equals 0
+  assert "$output" contains "Downloading"
+
+  local artifact="${SNIPPETS_DIR}/OMZL::spectrum.zsh/OMZL::spectrum.zsh"
+  assert "$artifact" is_file
+  assert "$artifact" is_readable
+}
+
+@test 'zi OMZP::git installation' {
+  run ./docker/run.sh --wrap --debug --zunit \
+    zi snippet OMZP::git
+
+  assert $state equals 0
+  assert "$output" contains "Downloading"
+
+  local artifact="${SNIPPETS_DIR}/OMZP::git/OMZP::git"
+  assert "$artifact" is_file
+  assert "$artifact" is_readable
+}
+
+@test 'zi PZTM::environment installation' {
+  run ./docker/run.sh --wrap --debug --zunit \
+    zi snippet PZTM::environment
+
+  assert $state equals 0
+  assert "$output" contains "Downloading"
+
+  local artifact="${SNIPPETS_DIR}/PZTM::environment/PZTM::environment"
+  assert "$artifact" is_file
+  assert "$artifact" is_readable
+}

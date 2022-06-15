@@ -1,0 +1,17 @@
+# -*- mode: zsh; sh-indentation: 2; indent-tabs-mode: nil; sh-basic-offset: 2; -*-
+# vim: ft=zsh sw=2 ts=2 et
+
+if [[ "$$" == 1 ]] && [[ -z "$ZSH_NO_INIT" ]] { source /src/docker/init.zsh; }
+
+source /src/utils.zsh
+zi::prepare; zi::install
+
+typeset -U path module_path
+path=("${ZPFX:-${HOME}/.zi/polaris}/bin" "${HOME}/go/bin" $path)
+module_path+=( /data/zmodules/zpmod/Src ); zmodload zi/zpmod &>/dev/null
+
+zi::init
+[[ -n "$ZI_ZSH_VERSION" ]] && zi::pack-zsh "$ZI_ZSH_VERSION"
+
+autoload -Uz _zi
+(( ${+_comps} )) && _comps[zi]=_zi

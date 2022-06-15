@@ -1,0 +1,14 @@
+version: "3.9"
+
+services:
+  zd:
+    build: .
+    #image: ghcr.io/z-shell/zd:latest
+    stdin_open: true
+    tty: true
+    container_name: zd
+    environment:
+      - TERM=xterm-256color
+    volumes:
+      - $PWD:/src
+    hostname: zi@docker
