@@ -9,7 +9,12 @@ path=("${ZPFX:-${HOME}/.zi/polaris}/bin" "${HOME}/go/bin" $path)
 module_path+=( /data/zmodules/zpmod/Src ); zmodload zi/zpmod &>/dev/null
 
 zi::init
-[[ -n "$ZI_ZSH_VERSION" ]] && zi::pack-zsh "$ZI_ZSH_VERSION"
+
+if [[ -n "$ZI_ZSH_VERSION" ]]; then
+  if [[ "$ZI_ZSH_VERSION" != "$ZSH_VERSION" ]]; then
+    zi::pack-zsh "$ZI_ZSH_VERSION"
+  fi
+fi
 
 autoload -Uz _zi
 (( ${+_comps} )) && _comps[zi]=_zi
