@@ -1,7 +1,7 @@
 # -*- mode: zsh; sh-indentation: 2; indent-tabs-mode: nil; sh-basic-offset: 2; -*-
 # vim: ft=zsh sw=2 ts=2 et
 
-if [[ "$$" == 1 ]] && [[ -z "$ZSH_NO_INIT" ]] { source /src/docker/init.zsh; }
+if [[ "$$" == 1 ]] && [[ -z "$ZSH_NO_INIT" ]] { source /src/init.zsh; }
 
 source /src/utils.zsh
 zi::prepare; zi::install
