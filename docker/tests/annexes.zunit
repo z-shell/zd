@@ -20,6 +20,7 @@
 
   assert $state equals 0
   assert "$output" contains "Downloading"
+  assert "$output" contains "Compiling"
 
   local artifact="${PLUGINS_DIR}/z-shell---z-a-bin-gem-node/z-a-bin-gem-node.plugin.zsh"
   assert "$artifact" is_file
@@ -32,6 +33,7 @@
 
   assert $state equals 0
   assert "$output" contains "Downloading"
+  assert "$output" contains "Compiling"
 
   local artifact="${PLUGINS_DIR}/z-shell---z-a-meta-plugins/z-a-meta-plugins.plugin.zsh"
   assert "$artifact" is_file
@@ -45,8 +47,74 @@
 
   assert $state equals 0
   assert "$output" contains "Downloading"
+  assert "$output" contains "Compiling"
 
   local artifact="${PLUGINS_DIR}/z-shell---z-a-readurl/z-a-readurl.plugin.zsh"
+  assert "$artifact" is_file
+  assert "$artifact" is_readable
+}
+
+@test 'z-a-rust installation' {
+  run ./docker/run.sh --wrap --debug --zunit \
+    zi light z-shell/z-a-rust
+
+  assert $state equals 0
+  assert "$output" contains "Downloading"
+  assert "$output" contains "Compiling"
+
+  local artifact="${PLUGINS_DIR}/z-shell---z-a-rust/z-a-rust.plugin.zsh"
+  assert "$artifact" is_file
+  assert "$artifact" is_readable
+}
+
+@test 'z-a-eval installation' {
+  run ./docker/run.sh --wrap --debug --zunit \
+    zi light z-shell/z-a-eval
+
+  assert $state equals 0
+  assert "$output" contains "Downloading"
+  assert "$output" contains "Compiling"
+
+  local artifact="${PLUGINS_DIR}/z-shell---z-a-eval/z-a-eval.plugin.zsh"
+  assert "$artifact" is_file
+  assert "$artifact" is_readable
+}
+
+@test 'z-a-linkbin installation' {
+  run ./docker/run.sh --wrap --debug --zunit \
+    zi light z-shell/z-a-linkbin
+
+  assert $state equals 0
+  assert "$output" contains "Downloading"
+  assert "$output" contains "Compiling"
+
+  local artifact="${PLUGINS_DIR}/z-shell---z-a-linkbin/z-a-linkbin.plugin.zsh"
+  assert "$artifact" is_file
+  assert "$artifact" is_readable
+}
+
+@test 'z-a-default-ice installation' {
+  run ./docker/run.sh --wrap --debug --zunit \
+    zi light z-shell/z-a-default-ice
+
+  assert $state equals 0
+  assert "$output" contains "Downloading"
+  assert "$output" contains "Compiling"
+
+  local artifact="${PLUGINS_DIR}/z-shell---z-a-default-ice/z-a-default-ice.plugin.zsh"
+  assert "$artifact" is_file
+  assert "$artifact" is_readable
+}
+
+@test 'z-a-test installation' {
+  run ./docker/run.sh --wrap --debug --zunit \
+    zi light z-shell/z-a-test
+
+  assert $state equals 0
+  assert "$output" contains "Downloading"
+  assert "$output" contains "Compiling"
+
+  local artifact="${PLUGINS_DIR}/z-shell---z-a-test/z-a-test.plugin.zsh"
   assert "$artifact" is_file
   assert "$artifact" is_readable
 }
