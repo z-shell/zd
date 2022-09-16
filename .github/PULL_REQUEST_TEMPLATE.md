@@ -1,4 +1,4 @@
-## Pull Request type
+# Pull Request type
 
 <!-- Please try to limit your pull request to one type -->
 
