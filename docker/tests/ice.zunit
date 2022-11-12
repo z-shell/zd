@@ -66,8 +66,6 @@
   run ./docker/run.sh --wrap --debug --zunit $z
 
   assert $state equals 0
-  assert "$output" contains "Downloading"
-
   local artifact="${PLUGINS_DIR}/sharkdp---fd/fd/fd"
   assert "$artifact" is_file
   assert "$artifact" is_readable
