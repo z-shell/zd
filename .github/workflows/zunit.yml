@@ -11,7 +11,7 @@ on:
   workflow_dispatch:
 
 env:
-  zi_branch: $GITHUB_REF
+  zi_branch: $GITHUB_REF_NAME
 
 jobs:
   zunit-matrix:
