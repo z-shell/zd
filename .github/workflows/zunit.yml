@@ -40,7 +40,6 @@ jobs:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - if: github.
       - uses: actions/checkout@v3
       - run: command git clone --branch $zi_branch --depth 1 -- https://github.com/z-shell/zi.git zi
       - name: "⚡ Install dependencies"
