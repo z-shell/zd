@@ -41,7 +41,7 @@ jobs:
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - uses: actions/checkout@v3
-      - run: command git clone --branch $zi_branch --depth 1 -- https://github.com/z-shell/zi.git zi
+      - run: command git clone --branch ${{ env.zi_branch }} --depth 1 -- https://github.com/z-shell/zi.git zi
       - name: "⚡ Install dependencies"
         run: |
           sudo apt-get update && sudo apt-get install -yq zsh
