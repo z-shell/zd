@@ -2,7 +2,9 @@ version: "3.9"
 
 services:
   zd:
-    build: .
+    build:
+      context: "."
+      dockerfile: "Dockerfile"
     #image: ghcr.io/z-shell/zd:latest
     stdin_open: true
     tty: true
