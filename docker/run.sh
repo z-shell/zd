@@ -17,7 +17,7 @@ err() {
 
 parent_process() {
   local ppid pcmd
-  ppid="$(ps -o ppid= -p "$$" | awk '{ print $1 }')"
+  ppid="$(ps -o ppid= -p "$$" | awk '{ print $1 }' || true)"
 
   if [[ -z ${ppid} ]]; then
     say "Failed to determine parent process"
@@ -39,7 +39,7 @@ running_interactively() {
 
   if ! [[ -t 1 ]]; then
     # return false if running non-interactively, unless run with zunit
-    parent_process | grep -q zunit
+    parent_process | grep -q zunit || true
   fi
 }
 
