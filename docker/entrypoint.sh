@@ -1,6 +1,8 @@
 #!/usr/bin/env sh
 
-export HOME=/home/"${ZUSER}"
+HOME="/home/${ZUSER}"
+
+export HOME
 
 command sed -ir 's#^(root:.+):/bin/ash#\1:/bin/zsh#' /etc/passwd
 command adduser -D -s /bin/zsh -u "${PUID}" -h "${HOME}" "${ZUSER}"
@@ -8,8 +10,8 @@ command adduser -D -s /bin/zsh -u "${PUID}" -h "${HOME}" "${ZUSER}"
 command printf '%s' "${ZUSER} ALL=(ALL) NOPASSWD: ALL" >/etc/sudoers.d/user
 command mkdir -p /src /data && chown -R "${PUID}:${PGID}" /src /data
 
-command -sfv /src/zshenv "${HOME}"/.zshenv
-command -sfv /src/zshrc "${HOME}"/.zshrc
+command ln -sfv /src/zshenv "${HOME}/.zshenv"
+command ln -sfv /src/zshrc "${HOME}/.zshrc"
 
 if [ -f "${HOME}"/init.zsh ]; then
   command chmod u+x "${HOME}"/init.zsh
