@@ -1,17 +1,18 @@
-#!/usr/bin/env bash
+#!/usr/bin/bash -l
 
 export HOME=/home/${ZUSER}
 
-sed -ir 's#^(root:.+):/bin/ash#\1:/bin/zsh#' /etc/passwd
-adduser -D -s /bin/zsh -u "${PUID}" -h "${HOME}" "${ZUSER}"
+command sed -ir 's#^(root:.+):/bin/ash#\1:/bin/zsh#' /etc/passwd
+command adduser -D -s /bin/zsh -u "${PUID}" -h "${HOME}" "${ZUSER}"
 
-printf '%s' "${ZUSER} ALL=(ALL) NOPASSWD: ALL" >/etc/sudoers.d/user
-mkdir -p /src /data && chown -R "${PUID}:${PGID}" /src /data
+command printf '%s' "${ZUSER} ALL=(ALL) NOPASSWD: ALL" >/etc/sudoers.d/user
+command mkdir -p /src /data && chown -R "${PUID}:${PGID}" /src /data
 
-ln -sfv /src/zshenv "${HOME}"/.zshenv
-ln -sfv /src/zshrc "${HOME}"/.zshrc
+command -sfv /src/zshenv "${HOME}"/.zshenv
+command -sfv /src/zshrc "${HOME}"/.zshrc
 
 if [[ -f ${HOME}/init.zsh ]]; then
-  chmod u+x "${HOME}"/init.zsh
-  "${HOME}"/init.zsh
+  command chmod u+x "${HOME}"/init.zsh
+  # shellcheck source=/dev/null
+  . "${HOME}"/init.zsh
 fi

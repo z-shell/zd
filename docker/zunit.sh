@@ -3,11 +3,7 @@
 # vim: ft=bash sw=2 ts=2 et
 
 run_tests() {
-  cd "$(
-    cd "$(dirname "$0")" >/dev/null 2>&1
-    pwd -P
-  )/.." || exit 9
-
+  command cd -P -- "$(dirname -- "$(command -v -- "$0" || true)")" && pwd -P || exit 9
   zunit run --verbose "$@"
 }
 

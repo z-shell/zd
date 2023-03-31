@@ -16,10 +16,7 @@ err() {
 }
 
 build() {
-  builtin cd "$(
-    builtin cd "$(dirname "$0")" >/dev/null 2>&1
-    pwd -P
-  )" || exit 9
+  command cd -P -- "$(dirname -- "$(command -v -- "$0" || true)")" && pwd -P || exit 9
 
   local image_name="${1:-zd}"
   local tag="${2:-latest}"
@@ -38,14 +35,14 @@ build() {
   [[ -n ${NO_CACHE} ]] && args+=(--no-cache "$@")
 
   if docker build \
-    --build-arg "ZUSER=$(id -u -n)" \
-    --build-arg "PUID=$(id -u)" \
-    --build-arg "PGID=$(id -g)" \
+    --build-arg "ZUSER=$(id -u -n || true)" \
+    --build-arg "PUID=$(id -u || true)" \
+    --build-arg "PGID=$(id -g || true)" \
     --build-arg "TERM=${TERM:-xterm-256color}" \
     --build-arg "ZI_ZSH_VERSION=${zsh_version}" \
     --file "${dockerfile}" \
     --tag "${image_name}:${tag}" \
-    "${args[@]}" "$(realpath ..)"; then
+    "${args[@]}" "$(realpath .. || true)"; then
     {
       say "To use this image for ZUnit tests run: "
       say "export CONTAINER_IMAGE=\"${image_name}\" CONTAINER_TAG=\"${tag}\""

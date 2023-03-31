@@ -37,7 +37,6 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
       - run: git clone --depth 1 -- https://github.com/z-shell/zi.git zi
-      #- uses: rlespinasse/github-slug-action@v4
       - uses: docker/setup-qemu-action@v2
       - name: Set up Docker Buildx
         id: buildx
@@ -50,13 +49,6 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Docker Layer Caching
-        uses: satackey/action-docker-layer-caching@v0.0.11
-        with:
-          key: docker-layer-caching-${{ github.workflow }}-{hash}
-          restore-keys: docker-layer-caching-${{ github.workflow }}-
-          concurrency: 6
-          skip-save: false
       - name: Build and push
         id: docker_build_zsh_versions
         uses: docker/build-push-action@v4
@@ -78,7 +70,6 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
       - run: git clone --depth 1 -- https://github.com/z-shell/zi.git zi
-      #- uses: rlespinasse/github-slug-action@v4
       - uses: docker/setup-qemu-action@v2
       - name: Set up Docker Buildx
         id: buildx
@@ -99,10 +90,7 @@ jobs:
           push: true
           file: ./docker/Dockerfile
           context: ./docker
-          tags: |
-            ghcr.io/${{ github.repository }}:latest
-            ghcr.io/${{ github.repository }}:${{ env.GITHUB_SHA_SHORT }}
-            ghcr.io/${{ github.repository }}:${{ env.GITHUB_REF_SLUG }}
+          tags: ghcr.io/${{ github.repository }}:latest
           platforms: linux/amd64,linux/arm64/v8
           cache-from: type=gha
           cache-to: type=gha,mode=max
