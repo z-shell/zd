@@ -1,5 +1,5 @@
 ---
-name: "🐋 ZI Docker"
+name: "🐋 Zi Docker"
 on:
   workflow_dispatch:
   schedule:
@@ -37,7 +37,7 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
       - run: git clone --depth 1 -- https://github.com/z-shell/zi.git zi
-      - uses: rlespinasse/github-slug-action@v4
+      #- uses: rlespinasse/github-slug-action@v4
       - uses: docker/setup-qemu-action@v2
       - name: Set up Docker Buildx
         id: buildx
@@ -78,7 +78,7 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
       - run: git clone --depth 1 -- https://github.com/z-shell/zi.git zi
-      - uses: rlespinasse/github-slug-action@v4
+      #- uses: rlespinasse/github-slug-action@v4
       - uses: docker/setup-qemu-action@v2
       - name: Set up Docker Buildx
         id: buildx
