@@ -11,10 +11,10 @@ ARG TERM=xterm-256color
 ARG ZI_ZSH_VERSION
 ARG APK_ADD
 
-ENV ZUSER=${ZUSER} PUID=${PUID} \
-PGID=${PGID} APK_ADD=${APK_ADD} \
-SHELL=/bin/zsh HOSTNAME=zi@docker DIR=/static \
-TERM=${TERM} ZI_ZSH_VERSION=${ZI_ZSH_VERSION}
+ENV ZUSER=${ZUSER} PUID=${PUID}
+ENV PGID=${PGID} APK_ADD=${APK_ADD}
+ENV SHELL=/bin/zsh HOSTNAME=zi@docker DIR=/static
+ENV TERM=${TERM} ZI_ZSH_VERSION=${ZI_ZSH_VERSION}
 
 # trunk-ignore(hadolint/DL3018)
 RUN apk --no-cache --virtual base add coreutils curl \
@@ -33,6 +33,6 @@ WORKDIR /home/${ZUSER}
 
 RUN sh -c "$(curl -fsSL https://raw.githubusercontent.com/z-shell/zi-src/main/lib/sh/install.sh)" -- -i skip \
 && ZI_HOME_DIR=/home/${ZUSER}/.zi ZI_BIN_DIR=/home/${ZUSER}/.zi/bin SHELL=/bin/zsh \
-zsh -i -lc -- '@zi-scheduler burst || true '
+zsh -cil -- '@zi-scheduler burst || true '
 
-CMD ["/bin/zsh", "-i", "-l"]
+CMD ["/bin/zsh", "-cil"]
