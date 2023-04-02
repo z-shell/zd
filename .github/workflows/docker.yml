@@ -59,7 +59,7 @@ jobs:
           context: ./docker
           build-args: ZI_ZSH_VERSION=${{ matrix.zsh_version }}
           tags: ghcr.io/${{ github.repository }}:zsh-${{ matrix.zsh_version }}
-          platforms: linux/amd64,linux/arm64/v8
+          platforms: linux/amd64,linux/arm64
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -91,6 +91,6 @@ jobs:
           file: ./docker/Dockerfile
           context: ./docker
           tags: ghcr.io/${{ github.repository }}:latest
-          platforms: linux/amd64,linux/arm64/v8
+          platforms: linux/amd64,linux/arm64
           cache-from: type=gha
           cache-to: type=gha,mode=max
