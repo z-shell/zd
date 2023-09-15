@@ -37,7 +37,7 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
       - run: git clone --depth 1 -- https://github.com/z-shell/zi.git zi
-      - uses: docker/setup-qemu-action@v2
+      - uses: docker/setup-qemu-action@v3
       - name: Set up Docker Buildx
         id: buildx
         uses: docker/setup-buildx-action@v2
@@ -70,7 +70,7 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
       - run: git clone --depth 1 -- https://github.com/z-shell/zi.git zi
-      - uses: docker/setup-qemu-action@v2
+      - uses: docker/setup-qemu-action@v3
       - name: Set up Docker Buildx
         id: buildx
         uses: docker/setup-buildx-action@v2
