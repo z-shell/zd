@@ -33,7 +33,7 @@ jobs:
           - 5.8.1
           - 5.9
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
       - run: git clone --depth 1 -- https://github.com/z-shell/zi.git zi
@@ -66,7 +66,7 @@ jobs:
   build-latest:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
       - run: git clone --depth 1 -- https://github.com/z-shell/zi.git zi
