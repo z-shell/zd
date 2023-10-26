@@ -12,8 +12,8 @@ ARG ZI_ZSH_VERSION
 ARG APK_ADD
 ARG SHELL=/bin/zsh
 ARG DIR=/static
-ARG ZI_HOME_DIR=/home/${ZUSER}/.zi
-ARG ZI_BIN_DIR=/home/${ZUSER}/.zi/bin
+#ARG ZI_HOME_DIR=/home/${ZUSER}/.zi
+#ARG ZI_BIN_DIR=/home/${ZUSER}/.zi/bin
 
 ENV ZUSER=${ZUSER} PUID=${PUID}
 ENV PGID=${PGID} APK_ADD=${APK_ADD}
