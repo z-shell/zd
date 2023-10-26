@@ -117,10 +117,10 @@ if [[ ${BASH_SOURCE[0]} == "${0}" ]]; then
   CONTAINER_TAG="${CONTAINER_TAG:-latest}"
   CONTAINER_ENV=()
   CONTAINER_VOLUMES=()
-  DEBUG="${DEBUG:-}"
-  ZSH_DEBUG="${ZSH_DEBUG:-}"
-  INIT_CONFIG_VAL="${INIT_CONFIG_VAL:-}"
-  WRAP_CMD="${WRAP_CMD:-}"
+  DEBUG="${DEBUG-}"
+  ZSH_DEBUG="${ZSH_DEBUG-}"
+  INIT_CONFIG_VAL="${INIT_CONFIG_VAL-}"
+  WRAP_CMD="${WRAP_CMD-}"
 
   while [[ -n $* ]]; do
     case "$1" in

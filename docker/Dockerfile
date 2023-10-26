@@ -5,22 +5,17 @@ LABEL email="<%= team@zshell.dev =%>"
 
 ARG HOSTNAME=zi@docker
 ARG ZUSER=z-user
-ARG PUID=1000
-ARG PGID=1000
-ARG TERM=xterm-256color
-ARG ZI_ZSH_VERSION
-ARG APK_ADD
 ARG SHELL=/bin/zsh
 ARG DIR=/static
-#ARG ZI_HOME_DIR=/home/${ZUSER}/.zi
-#ARG ZI_BIN_DIR=/home/${ZUSER}/.zi/bin
 
-ENV ZUSER=${ZUSER} PUID=${PUID}
-ENV PGID=${PGID} APK_ADD=${APK_ADD}
+ENV ZUSER=${ZUSER}
+ENV PUID=${PUID}
+ENV PGID=${PGID}
+ENV HOSTNAME=${HOSTNAME}
+ENV APK_ADD=${APK_ADD}
 ENV DIR=${DIR} TERM=${TERM}
 ENV ZI_ZSH_VERSION=${ZI_ZSH_VERSION}
-ENV ZI_HOME_DIR=${ZI_HOME_DIR}
-ENV ZI_BIN_DIR=${ZI_BIN_DIR}
+ENV ZI_HOME_DIR=${ZI_HOME_DIR} ZI_BIN_DIR=${ZI_BIN_DIR}
 
 # trunk-ignore(hadolint/DL3018)
 RUN apk --no-cache --virtual base add coreutils curl \
@@ -37,7 +32,6 @@ COPY --chown=${ZUSER} . /src
 USER ${ZUSER}
 WORKDIR /home/${ZUSER}
 
-RUN sh -c "$(curl -fsSL https://raw.githubusercontent.com/z-shell/zi-src/main/lib/sh/install.sh)" -- -i skip \
-&& /bin/zsh -cl -- '@zi-scheduler burst || true'
+RUN sh -c "$(curl -fsSL https://raw.githubusercontent.com/z-shell/zi-src/main/lib/sh/install.sh)" -- -i skip
 
-CMD ["/bin/zsh", "-il"]
+CMD ["/bin/zsh", "-l"]

@@ -55,10 +55,10 @@ build() {
 }
 
 if [[ ${BASH_SOURCE[0]} == "${0}" ]]; then
-  BUILD_ZSH_VERSION="${BUILD_ZSH_VERSION:-}"
+  BUILD_ZSH_VERSION="${BUILD_ZSH_VERSION-}"
   CONTAINER_IMAGE="${CONTAINER_IMAGE:-ghcr.io/z-shell/zd}"
   CONTAINER_TAG="${CONTAINER_TAG:-latest}"
-  NO_CACHE="${NO_CACHE:-}"
+  NO_CACHE="${NO_CACHE-}"
 
   while [[ -n $* ]]; do
     case "$1" in
