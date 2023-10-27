@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
+#
 # -*- mode: bash; sh-indentation: 2; indent-tabs-mode: nil; sh-basic-offset: 2; -*-
 # vim: ft=bash sw=2 ts=2 et
+#
 
 col_error="[31m"
 col_info="[32m"
@@ -35,11 +37,6 @@ build() {
   [[ -n ${NO_CACHE} ]] && args+=(--no-cache "$@")
 
   if docker build \
-    --build-arg "ZUSER=${USER:-$(id -u -n || true)}" \
-    --build-arg "PUID=${UID:-$(id -u || true)}" \
-    --build-arg "PGID=${GID:-$(id -g || true)}" \
-    --build-arg "TERM=${TERM:-xterm-256color}" \
-    --build-arg "HOSTNAME=zi@docker" \
     --build-arg "ZI_ZSH_VERSION=${zsh_version}" \
     --file "${dockerfile}" \
     --tag "${image_name}:${tag}" \

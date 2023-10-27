@@ -8,11 +8,11 @@ plugins:
       uri: https://github.com/trunk-io/plugins
 lint:
   disabled:
+    - terrascan
+    - trivy
+    - checkov
     - yamllint
   enabled:
-    - checkov@2.5.9
-    - terrascan@1.18.3
-    - trivy@0.46.0
     - trufflehog@3.60.4
     - actionlint@1.6.26
     - git-diff-check

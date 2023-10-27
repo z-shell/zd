@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
+#
 # -*- mode: bash; sh-indentation: 2; indent-tabs-mode: nil; sh-basic-offset: 2; -*-
 # vim: ft=bash sw=2 ts=2 et
+#
 
 col_error="[31m"
 col_info="[32m"
@@ -153,14 +155,17 @@ if [[ ${BASH_SOURCE[0]} == "${0}" ]]; then
       CONTAINER_IMAGE="$2"
       shift 2
       ;;
+    # Set the tag of the container image
     -t | --tag)
       CONTAINER_TAG="$2"
       shift 2
       ;;
+    # Set an environment variable in the container
     -e | --env | --environment)
       CONTAINER_ENV+=("$2")
       shift 2
       ;;
+    # Mount a volume into the container
     -v | --volume)
       CONTAINER_VOLUMES+=("$2")
       shift 2
@@ -170,6 +175,7 @@ if [[ ${BASH_SOURCE[0]} == "${0}" ]]; then
       WRAP_CMD=1
       shift
       ;;
+    # Whether to run zd with zunit
     --tests | --zunit | -z)
       ZUNIT=1
       shift
@@ -205,13 +211,11 @@ if [[ ${BASH_SOURCE[0]} == "${0}" ]]; then
       cd -P -- "$(dirname "$0")"
       pwd -P
     )" || exit 9
-    # Mount root of the repo to /src
-    # Mount /tmp/zunit-zd to /data
     CONTAINER_VOLUMES+=(
       "${CONTAINER_ROOT}:/src"
-      "${TMPDIR:-/tmp}/ZZUnit:/data"
-      "${ROOT_DIR}/zshenv:/home/z-user/.zshenv"
-      "${ROOT_DIR}/zshrc:/home/z-user/.zshrc"
+      "${TMPDIR:-/tmp}/runtime_data:/data"
+      "${ROOT_DIR}/zshenv:/home/user/.zshenv"
+      "${ROOT_DIR}/zshrc:/home/user/.zshrc"
     )
     CONTAINER_ENV+=(
       "QUIET=1"

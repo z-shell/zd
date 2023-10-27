@@ -1,7 +1,7 @@
 #!/usr/bin/env zunit
 
 setup() {
-  export DATA_DIR="${TMPDIR:-/tmp}/ZZUnit"
+  export DATA_DIR="${TMPDIR:-/tmp}/runtime_data"
   export PLUGINS_DIR="${DATA_DIR}/plugins"
   export SNIPPETS_DIR="${DATA_DIR}/snippets"
   export ZPFX="${DATA_DIR}/polaris"
