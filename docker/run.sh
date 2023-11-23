@@ -206,12 +206,12 @@ if [[ ${BASH_SOURCE[0]} == "${0}" ]]; then
       pwd -P
     )" || exit 9
     # Mount root of the repo to /src
-    # Mount /tmp/zunit-zd to /data
+    # Mount /tmp/zunit to /data
     CONTAINER_VOLUMES+=(
       "${CONTAINER_ROOT}:/src"
-      "${TMPDIR:-/tmp}/ZZUnit:/data"
-      "${ROOT_DIR}/zshenv:/home/z-user/.zshenv"
-      "${ROOT_DIR}/zshrc:/home/z-user/.zshrc"
+      "${TMPDIR:-/tmp}/zunit:/data"
+      "${ROOT_DIR}/zshenv:/home/zunit/.zshenv"
+      "${ROOT_DIR}/zshrc:/home/zunit/.zshrc"
     )
     CONTAINER_ENV+=(
       "QUIET=1"

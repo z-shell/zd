@@ -1,27 +1,30 @@
 #!/usr/bin/env zsh
 
-zi::prepare() {
+# Functions to wrap container setup and initialization.
+
+prepare_system() {
   printf '%s\n' "Setting owner of /data to ${PUID}:${PGID}" >&2
-  sudo chown "${PUID}:${PGID}" /data
   sudo chown -R "${PUID}:${PGID}" /data
 
   printf '%s\n' "Copying files from /static to /data" >&2
   rsync -raq /static/ /data
 }
 
-zi::install() {
-  sh -c "$(curl -fsSL https://raw.githubusercontent.com/z-shell/zi-src/main/lib/sh/install.sh)" -- -i skip 1&>/dev/null
-}
+initiate_system() {
+  typeset -gxU path module_path
 
-zi::module() {
-  sh -c "$(curl -fsSL https://raw.githubusercontent.com/z-shell/zi-src/main/lib/sh/install.sh)" -- -a zpmod 1&>/dev/null
-}
+  path=("${ZPFX:-${HOME}/.zi/polaris}/bin" "${HOME}/go/bin" $path)
+  module_path+=( /data/zmodules/zpmod/Src )
 
-zi::init() {
+  zmodload zi/zpmod &>/dev/null
+
   source ~/.zi/bin/zi.zsh
+
+  autoload -Uz _zi
+  (( ${+_comps} )) && _comps[zi]=_zi
 }
 
-zi::reload() {
+reload_system() {
   local zf1 zf2
   for zf1 in ~/.zi/bin/*.zsh; do
     source "$zf1"
@@ -29,6 +32,14 @@ zi::reload() {
   for zf2 in ~/.zi/bin/lib/zsh/*.zsh; do
     source "$zf2"
   done
+}
+
+# Functions to wrap Zi commands.
+
+zi::install-zsdoc() {
+  zi light-mode \
+    make"PREFIX=$ZPFX install" \
+    for z-shell/zsdoc
 }
 
 zi::setup-keys() {
@@ -51,12 +62,6 @@ zi::setup-annexes+add() {
   zi light-mode for z-shell/z-a-test
 }
 
-zi::install-zsdoc() {
-  zi light-mode \
-    make"PREFIX=$ZPFX install" \
-    for z-shell/zsdoc
-}
-
 zi::setup-minimal() {
   zi wait lucid light-mode for \
     atinit"zicompinit; zicdreplay" \
@@ -70,5 +75,5 @@ zi::setup-minimal() {
 zi::pack-zsh() {
   local ZSH_VERSION="$1"
   zi pack"$ZSH_VERSION" for zsh
-  zi pack atload=+"zicompinit; zicdreplay" for system-completions  
+  zi pack atload=+"zicompinit; zicdreplay" for system-completions
 }

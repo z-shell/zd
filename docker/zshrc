@@ -1,20 +1,13 @@
 # -*- mode: zsh; sh-indentation: 2; indent-tabs-mode: nil; sh-basic-offset: 2; -*-
 # vim: ft=zsh sw=2 ts=2 et
 
+# Prepare and initiate the source tree.
 source /src/utils.zsh
-zi::prepare; zi::install
+prepare_system; initiate_system
 
-typeset -U path module_path
-path=("${ZPFX:-${HOME}/.zi/polaris}/bin" "${HOME}/go/bin" $path)
-module_path+=( /data/zmodules/zpmod/Src ); zmodload zi/zpmod &>/dev/null
-
-zi::init
-
+# If the ZI_ZSH_VERSION is set will install the specified version of Zsh with Zi.
 if [[ -n "$ZI_ZSH_VERSION" ]]; then
   if [[ "$ZI_ZSH_VERSION" != "$ZSH_VERSION" ]]; then
     zi::pack-zsh "$ZI_ZSH_VERSION"
   fi
 fi
-
-autoload -Uz _zi
-(( ${+_comps} )) && _comps[zi]=_zi

@@ -21,6 +21,7 @@ build() {
   local image_name="${1:-zd}"
   local tag="${2:-latest}"
   local zsh_version="${3}"
+  local container_hostname="z-shell"
   shift 3
 
   local dockerfile="Dockerfile"
@@ -35,11 +36,11 @@ build() {
   [[ -n ${NO_CACHE} ]] && args+=(--no-cache "$@")
 
   if docker build \
-    --build-arg "ZUSER=${USER:-$(id -u -n || true)}" \
-    --build-arg "PUID=${UID:-$(id -u || true)}" \
-    --build-arg "PGID=${GID:-$(id -g || true)}" \
+    --build-arg "ZUSER=${USER:-$(id -u -n)}" \
+    --build-arg "ZHOST=${container_hostname}" \
+    --build-arg "PUID=${UID:-$(id -u)}" \
+    --build-arg "PGID=${GID:-$(id -g)}" \
     --build-arg "TERM=${TERM:-xterm-256color}" \
-    --build-arg "HOSTNAME=zi@docker" \
     --build-arg "ZI_ZSH_VERSION=${zsh_version}" \
     --file "${dockerfile}" \
     --tag "${image_name}:${tag}" \
@@ -55,8 +56,8 @@ build() {
 }
 
 if [[ ${BASH_SOURCE[0]} == "${0}" ]]; then
-  BUILD_ZSH_VERSION="${BUILD_ZSH_VERSION-}"
   CONTAINER_IMAGE="${CONTAINER_IMAGE:-ghcr.io/z-shell/zd}"
+  BUILD_ZSH_VERSION="${BUILD_ZSH_VERSION-}"
   CONTAINER_TAG="${CONTAINER_TAG:-latest}"
   NO_CACHE="${NO_CACHE-}"
 

@@ -1,37 +1,53 @@
-ARG VERSION=latest
-FROM alpine:${VERSION}
+ARG VERSION=edge
+FROM alpine:$VERSION
 LABEL maintainer="<%= Z-Shell Community %>"
 LABEL email="<%= team@zshell.dev =%>"
 
-ARG HOSTNAME=zi@docker
-ARG ZUSER=z-user
-ARG SHELL=/bin/zsh
-ARG DIR=/static
+ARG DIR
+ARG PUID
+ARG PGID
+ARG TERM
+ARG ZUSER
+ARG ZHOST
 
-ENV ZUSER=${ZUSER}
-ENV PUID=${PUID}
-ENV PGID=${PGID}
-ENV HOSTNAME=${HOSTNAME}
-ENV APK_ADD=${APK_ADD}
-ENV DIR=${DIR} TERM=${TERM}
-ENV ZI_ZSH_VERSION=${ZI_ZSH_VERSION}
-ENV ZI_HOME_DIR=${ZI_HOME_DIR} ZI_BIN_DIR=${ZI_BIN_DIR}
+ENV DIR=${DIR:-/static}
+ENV PUID=${PUID:-1000}
+ENV PGID=${PGID:-1000}
+ENV TERM=${TERM:-xterm}
+ENV ZUSER=${ZUSER:-user}
+ENV HOST=$ZHOST
 
-# trunk-ignore(hadolint/DL3018)
-RUN apk --no-cache --virtual base add coreutils curl \
-jq git libuser rsync sudo zsh ncurses-dev pcre-dev zlib-dev alpine-zsh-config \
-&& apk --no-cache --virtual zsh-build-tools add autoconf bash build-base go vim
+RUN set -ex && apk --no-cache add \
+  alpine-zsh-config \
+  ncurses-dev \
+  build-base \
+  coreutils \
+  pcre-dev \
+  zlib-dev \
+  autoconf \
+  libuser \
+  rsync \
+  bash \
+  curl \
+  sudo \
+  zsh \
+  git \
+  vim \
+  go \
+  jq
 
 WORKDIR $DIR
 COPY . .
 RUN chmod +x entrypoint.sh && ./entrypoint.sh
 
 VOLUME ["/src", "/data"]
-COPY --chown=${ZUSER} . /src
+COPY --chown=$ZUSER . /src
 
-USER ${ZUSER}
-WORKDIR /home/${ZUSER}
+USER $ZUSER
+WORKDIR /home/$ZUSER
 
-RUN sh -c "$(curl -fsSL https://raw.githubusercontent.com/z-shell/zi-src/main/lib/sh/install.sh)" -- -i skip
+RUN /tmp/install.sh -i skip
 
-CMD ["/bin/zsh", "-l"]
+SHELL ["/bin/zsh", "-lc", "@zi-scheduler burst"]
+
+CMD ["zsh", "-il"]
