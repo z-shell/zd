@@ -55,7 +55,10 @@ docker/
   - Never use Bashisms (`[[ ]]`, arrays, `local` with assignment, etc.) in this file.
 - **`run.sh`**, **`build.sh`**, **`zunit.sh`** are Bash (shebang `#!/usr/bin/env bash`). 2-space indentation, `# vim: ft=bash sw=2 ts=2 et` modeline.
 - **Zsh files** (`utils.zsh`, `zshrc`, `zshenv`, `*.zunit`) use 2-space indentation and the modeline `# vim: ft=zsh sw=2 ts=2 et`.
-- All text files: UTF-8, LF line endings, 2-space indent (except Makefiles/Go/Java → 4-space/tab).
+- All text files: UTF-8, LF line endings. Default indent is 2 spaces, except:
+  - `Makefile*`: tab indentation with `indent_size=4`.
+  - `*.py`, `*.rb`: 4-space indentation.
+  - `*.go`, `*.java`, `*.scala`, `*.groovy`, `*.kotlin`: tab indentation with `indent_size=4`.
 - Trailing whitespace is trimmed; files end with a newline (enforced by `.editorconfig`).
 
 ### Dockerfile
@@ -80,7 +83,7 @@ docker/
 | Workflow | Trigger | What it does |
 |---|---|---|
 | `docker.yml` | push/PR to `main` touching `docker/**`, scheduled Wed 03:00 UTC | Builds multi-arch image (`linux/amd64`, `linux/arm64`) for Zsh 5.5.1–5.9 matrix + `latest` tag |
-| `zunit.yml` | push to `main` touching `*.zunit`, scheduled Mon/Wed 12:00 UTC, `workflow_dispatch` | Runs each `*.zunit` file as a separate matrix job |
+| `zunit.yml` | push to `main` touching `*.zunit`, scheduled Mon/Wed/Fri/Sun 12:00 UTC, `workflow_dispatch` | Runs each `*.zunit` file as a separate matrix job |
 | `zsh-n.yml` | Zsh `-n` syntax check | Checks all Zsh files for syntax errors |
 
 ### Common build failure causes
