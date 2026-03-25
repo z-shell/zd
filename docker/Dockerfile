@@ -47,6 +47,7 @@ RUN set -ex \
        armv6l|armv7l) GOARCH="armv6l" ;; \
        *)       echo "Unsupported arch: $ARCH" && exit 1 ;; \
      esac \
+  && rm -rf /usr/local/go \
   && curl -fsSL "https://go.dev/dl/go${GO_VERSION}.linux-${GOARCH}.tar.gz" \
      | tar -C /usr/local -xz \
   && go version
