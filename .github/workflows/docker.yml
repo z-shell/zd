@@ -37,7 +37,7 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
       - run: git clone --depth 1 -- https://github.com/z-shell/zi.git zi
-      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-qemu-action@v4
       - name: Set up Docker Buildx
         id: buildx
         uses: docker/setup-buildx-action@v3
@@ -51,7 +51,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Build and push
         id: docker_build_zsh_versions
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         timeout-minutes: 60
         with:
           push: ${{ github.event.number == 0 }}
@@ -70,7 +70,7 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
       - run: git clone --depth 1 -- https://github.com/z-shell/zi.git zi
-      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-qemu-action@v4
       - name: Set up Docker Buildx
         id: buildx
         uses: docker/setup-buildx-action@v3
@@ -84,7 +84,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Build and push
         id: docker_build_latest
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         if: github.ref == 'refs/heads/main'
         with:
           push: true
