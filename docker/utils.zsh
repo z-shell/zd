@@ -13,7 +13,7 @@ prepare_system() {
 initiate_system() {
   typeset -gxU path module_path
 
-  path=("${ZPFX:-${HOME}/.zi/polaris}/bin" "${HOME}/go/bin" $path)
+  path=("${ZPFX:-${HOME}/.zi/polaris}/bin" "${HOME}/go/bin" "/usr/local/go/bin" $path)
   module_path+=( /data/zmodules/zpmod/Src )
 
   zmodload zi/zpmod &>/dev/null
