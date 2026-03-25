@@ -53,7 +53,10 @@
   assert "$output" contains "Cloning into"
 
   local artifact="${PLUGINS_DIR}/z-shell---zsh-diff-so-fancy/bin/git-dsf"
-  local artifact="${PLUGINS_DIR}/z-shell---zsh-diff-so-fancy/bin/diff-so-fancy"
+  assert "$artifact" is_file
+  assert "$artifact" is_executable
+
+  artifact="${PLUGINS_DIR}/z-shell---zsh-diff-so-fancy/bin/diff-so-fancy"
   assert "$artifact" is_file
   assert "$artifact" is_executable
 }

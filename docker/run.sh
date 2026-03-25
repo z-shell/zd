@@ -51,8 +51,8 @@ create_init_config_file() {
   fi
 
   tempfile="$(mktemp)"
-  say "$*" >"${tempfile}"
-  say "${tempfile}"
+  printf '%s\n' "$*" >"${tempfile}"
+  printf '%s\n' "${tempfile}"
 }
 
 run() {

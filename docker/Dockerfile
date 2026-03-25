@@ -1,7 +1,7 @@
 ARG VERSION=edge
 FROM alpine:$VERSION
-LABEL maintainer="<%= Z-Shell Community %>"
-LABEL email="<%= team@zshell.dev =%>"
+LABEL maintainer="Z-Shell Community"
+LABEL email="team@zshell.dev"
 
 ARG DIR
 ARG PUID
@@ -69,7 +69,5 @@ USER $ZUSER
 WORKDIR /home/$ZUSER
 
 RUN /tmp/install.sh -i skip
-
-SHELL ["/bin/zsh", "-lc", "@zi-scheduler burst"]
 
 CMD ["zsh", "-il"]
