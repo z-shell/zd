@@ -70,6 +70,4 @@ WORKDIR /home/$ZUSER
 
 RUN /tmp/install.sh -i skip
 
-RUN zsh -lc "@zi-scheduler burst"
-
 CMD ["zsh", "-il"]
