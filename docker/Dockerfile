@@ -48,8 +48,8 @@ RUN set -ex \
        *)       echo "Unsupported arch: $ARCH" && exit 1 ;; \
      esac \
   && rm -rf /usr/local/go \
-  && curl -fsSL "https://go.dev/dl/go${GO_VERSION}.linux-${GOARCH}.tar.gz" \
-     | tar -C /usr/local -xz \
+  && curl -fsSL "https://go.dev/dl/go${GO_VERSION}.linux-${GOARCH}.tar.gz" -o /tmp/go.tar.gz \
+  && tar -C /usr/local -xzf /tmp/go.tar.gz \
   && go version
 
 WORKDIR $DIR
