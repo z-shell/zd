@@ -50,10 +50,12 @@ RUN set -ex \
   && GO_TARBALL="go${GO_VERSION}.linux-${GOARCH}.tar.gz" \
   && rm -rf /usr/local/go \
   && curl -fsSL "https://go.dev/dl/${GO_TARBALL}" -o "/tmp/${GO_TARBALL}" \
-  && curl -fsSL "https://go.dev/dl/${GO_TARBALL}.sha256" -o "/tmp/${GO_TARBALL}.sha256" \
-  && echo "$(cat "/tmp/${GO_TARBALL}.sha256")  /tmp/${GO_TARBALL}" | sha256sum -c - \
+  && EXPECTED_SHA256="$(curl -fsSL 'https://go.dev/dl/?mode=json&include=all' \
+       | jq -r --arg f "${GO_TARBALL}" '.[].files[] | select(.filename==$f) | .sha256')" \
+  && [ -n "${EXPECTED_SHA256}" ] || { echo "Failed to retrieve SHA256 for ${GO_TARBALL}" && exit 1; } \
+  && echo "${EXPECTED_SHA256}  /tmp/${GO_TARBALL}" | sha256sum -c - \
   && tar -C /usr/local -xzf "/tmp/${GO_TARBALL}" \
-  && rm -f "/tmp/${GO_TARBALL}" "/tmp/${GO_TARBALL}.sha256" \
+  && rm -f "/tmp/${GO_TARBALL}" \
   && go version
 
 WORKDIR $DIR
