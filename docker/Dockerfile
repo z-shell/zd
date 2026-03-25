@@ -47,9 +47,12 @@ RUN set -ex \
        armv6l|armv7l) GOARCH="armv6l" ;; \
        *)       echo "Unsupported arch: $ARCH" && exit 1 ;; \
      esac \
+  && GO_TARBALL="go${GO_VERSION}.linux-${GOARCH}.tar.gz" \
   && rm -rf /usr/local/go \
-  && curl -fsSL "https://go.dev/dl/go${GO_VERSION}.linux-${GOARCH}.tar.gz" -o /tmp/go.tar.gz \
-  && tar -C /usr/local -xzf /tmp/go.tar.gz \
+  && curl -fsSL "https://go.dev/dl/${GO_TARBALL}" -o "/tmp/${GO_TARBALL}" \
+  && curl -fsSL "https://go.dev/dl/${GO_TARBALL}.sha256" -o "/tmp/${GO_TARBALL}.sha256" \
+  && sha256sum -c "/tmp/${GO_TARBALL}.sha256" \
+  && tar -C /usr/local -xzf "/tmp/${GO_TARBALL}" \
   && go version
 
 WORKDIR $DIR
