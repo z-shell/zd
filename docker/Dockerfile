@@ -9,6 +9,8 @@ ARG PGID
 ARG TERM
 ARG ZUSER
 ARG ZHOST
+# Bump this ARG when a new Go release is available
+ARG GO_VERSION=1.26.1
 
 ENV DIR=${DIR:-/static}
 ENV PUID=${PUID:-1000}
@@ -16,6 +18,7 @@ ENV PGID=${PGID:-1000}
 ENV TERM=${TERM:-xterm}
 ENV ZUSER=${ZUSER:-user}
 ENV HOST=$ZHOST
+ENV PATH="/usr/local/go/bin:$PATH"
 
 RUN set -ex && apk --no-cache add \
   alpine-zsh-config \
@@ -33,8 +36,20 @@ RUN set -ex && apk --no-cache add \
   zsh \
   git \
   vim \
-  go \
   jq
+
+# Install Go from upstream — avoids the outdated apk package
+RUN set -ex \
+  && ARCH="$(uname -m)" \
+  && case "$ARCH" in \
+       x86_64)       GOARCH="amd64" ;; \
+       aarch64)      GOARCH="arm64" ;; \
+       armv6l|armv7l) GOARCH="armv6l" ;; \
+       *)       echo "Unsupported arch: $ARCH" && exit 1 ;; \
+     esac \
+  && curl -fsSL "https://go.dev/dl/go${GO_VERSION}.linux-${GOARCH}.tar.gz" \
+     | tar -C /usr/local -xz \
+  && go version
 
 WORKDIR $DIR
 COPY . .
