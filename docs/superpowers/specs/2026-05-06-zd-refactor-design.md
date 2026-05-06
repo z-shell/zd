@@ -99,6 +99,8 @@ Same test rewritten:
 
 Each test gets a fresh isolated zsh process. No shared state between tests. `zi_test` works identically in both the native tier and inside the Docker container — only `ZI_BIN` and `ZI_DATA` env vars differ.
 
+> **Note on variable interpolation:** `${script}` is interpolated into the outer zsh string before the inner zsh runs, so `$VAR` references in the script body resolve in the inner shell's environment (after sourcing zi). To pass a value from the test's environment into the script, expand it explicitly: `zi_test "zi light ${some_var}"`.
+
 File-level assertions reference `ZI_DATA` directly:
 
 ```zsh
@@ -146,11 +148,20 @@ RUN apk --no-cache add \
 ARG ZI_BRANCH=main
 RUN zsh -c "$(curl -fsSL https://install.zshell.dev)" -- -i skip
 
+# Install the matrix Zsh version via zi pack at build time.
+# ZSH_VERSION is empty for the :latest image (uses Alpine's zsh).
+ARG ZSH_VERSION=
+RUN if [ -n "${ZSH_VERSION}" ]; then \
+      zsh -ilc "zi pack\"${ZSH_VERSION}\" for zsh"; \
+    fi
+
 FROM base AS test
 ARG ZUSER=user
 ARG PUID=1000
 ARG PGID=1000
 
+# entrypoint.sh: creates $ZUSER, sets up sudo, creates /src /data dirs.
+# Dropped from current: wget install.sh, symlink zshenv/zshrc, source init.zsh.
 COPY docker/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh && /entrypoint.sh
 
@@ -168,9 +179,10 @@ CMD ["zsh", "-il"]
 ```
 
 Key fixes vs. current:
+- `ARG ZSH_VERSION` is now used: non-empty value installs that exact Zsh version via `zi pack` during build, baking it into the image layer
 - zi is baked in during `docker build` — no network calls at test time
 - `VOLUME` declared after `COPY` (current ordering silently discards the copy)
-- `entrypoint.sh` only handles user creation — no `wget install.sh` download
+- `entrypoint.sh` scope reduced to: create user, set up sudo, create `/src` and `/data` dirs — no `wget install.sh`, no symlinks, no `init.zsh` sourcing
 - Go removed (not needed for test execution)
 
 ### Matrix Workflow
@@ -178,19 +190,28 @@ Key fixes vs. current:
 **Workflow:** `.github/workflows/test-matrix.yml`
 
 - Trigger: weekly schedule (`0 3 * * 3`), `workflow_dispatch` only — not on every push
-- Matrix: 6 Zsh versions × 5 test files = 30 jobs (`fail-fast: false`)
+- Matrix: 6 jobs, one per Zsh version (`fail-fast: false`)
+- Each job builds its image once, then runs all test files inside that single container
 - Buildx layer caching via `type=gha` — repeat runs rebuild only changed layers
 
-**Run per matrix cell:**
+**Run per matrix job:**
 ```sh
+# Build once for this Zsh version
+docker build \
+  --build-arg ZSH_VERSION=${{ matrix.zsh_version }} \
+  --tag zd:${{ matrix.zsh_version }} \
+  --cache-from type=gha --cache-to type=gha,mode=max \
+  .
+
+# Run all test files in a single container invocation
 docker run --rm \
   -e ZI_DATA=/data \
   -v "${RUNNER_TEMP}/zunit:/data" \
   zd:${{ matrix.zsh_version }} \
-  zsh -c "zunit --tap --verbose /src/tests/${{ matrix.file }}.zunit"
+  zsh -c "for f in /src/tests/*.zunit; do zunit --tap --verbose \"\$f\"; done"
 ```
 
-The native workflow catches regressions on every PR. The matrix workflow verifies Zsh version compatibility on a cadence, not blocking every merge.
+This is 6 jobs instead of 30, with one image build per Zsh version instead of five. The native workflow catches regressions on every PR; the matrix workflow verifies Zsh version compatibility on a cadence, not blocking every merge.
 
 ## Migration of Existing Tests
 
