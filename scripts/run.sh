@@ -117,6 +117,7 @@ if [[ ${BASH_SOURCE[0]} == "${0}" ]]; then
   CONTAINER_VOLUMES=()
   DEBUG="${DEBUG-}"
   ZSH_DEBUG="${ZSH_DEBUG-}"
+  DEVEL="${DEVEL-}"
   INIT_CONFIG_VAL="${INIT_CONFIG_VAL-}"
   WRAP_CMD="${WRAP_CMD-}"
 
@@ -180,7 +181,7 @@ if [[ ${BASH_SOURCE[0]} == "${0}" ]]; then
     trap 'rm -vf $INIT_CONFIG' EXIT INT
   fi
   CONTAINER_ROOT="$(
-    cd -P -- "$(dirname "$0")"
+    cd -P -- "$(dirname "$0")/.."
     pwd -P
   )" || exit 9
   if [[ -n ${DEVEL} ]]; then

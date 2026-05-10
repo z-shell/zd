@@ -24,7 +24,7 @@ build() {
   local container_hostname="z-shell"
   shift 3
 
-  local dockerfile="docker/Dockerfile"
+  local dockerfile="../docker/Dockerfile"
 
   if [[ -n ${zsh_version} ]]; then
     tag="zsh${zsh_version}-${tag}"
@@ -33,7 +33,8 @@ build() {
   say "Building image: ${image_name}"
 
   local -a args
-  [[ -n ${NO_CACHE} ]] && args+=(--no-cache "$@")
+  [[ -n ${NO_CACHE} ]] && args+=(--no-cache)
+  args+=("$@")
 
   if docker build \
     --build-arg "ZUSER=${USER:-$(id -u -n)}" \
