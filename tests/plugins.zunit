@@ -1,0 +1,64 @@
+#!/usr/bin/env zunit
+#
+# -*- mode: zsh; sh-indentation: 2; indent-tabs-mode: nil; sh-basic-offset: 2; -*-
+# vim: ft=zsh sw=2 ts=2 et
+#
+
+@setup {
+  load setup
+  load helpers
+  setup
+}
+
+@teardown {
+  load teardown
+  teardown
+}
+
+@test 'zi fzf installation' {
+  zi_test 'zi lucid as"program" from"gh-r" for junegunn/fzf'
+
+  assert $state equals 0
+  assert "$output" contains "Unpacking"
+  assert "$output" contains "Successfully"
+
+  local artifact="${ZI_DATA}/plugins/junegunn---fzf/fzf"
+  assert "$artifact" is_file
+  assert "$artifact" is_executable
+}
+
+@test 'zi direnv installation' {
+  zi_test '
+    zi light-mode as"program" \
+      atclone"go install github.com/cpuguy83/go-md2man/v2@latest" \
+      make for @direnv/direnv
+  '
+
+  assert $state equals 0
+  assert "$output" contains "Downloading"
+  assert "$output" contains "go: downloading github.com"
+
+  local artifact="${ZI_DATA}/plugins/direnv---direnv/direnv"
+  assert "$artifact" is_file
+  assert "$artifact" is_executable
+}
+
+@test 'zi diff-so-fancy installation' {
+  zi_test '
+    zi light-mode for \
+      as"program" pick"bin/git-dsf" \
+        z-shell/zsh-diff-so-fancy
+  '
+
+  assert $state equals 0
+  assert "$output" contains "Downloading"
+  assert "$output" contains "Cloning into"
+
+  local artifact="${ZI_DATA}/plugins/z-shell---zsh-diff-so-fancy/bin/git-dsf"
+  assert "$artifact" is_file
+  assert "$artifact" is_executable
+
+  artifact="${ZI_DATA}/plugins/z-shell---zsh-diff-so-fancy/bin/diff-so-fancy"
+  assert "$artifact" is_file
+  assert "$artifact" is_executable
+}
