@@ -6,6 +6,7 @@
 
 @setup {
   load setup
+  load helpers
   setup
 }
 
