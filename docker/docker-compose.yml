@@ -3,14 +3,13 @@ version: "3.9"
 services:
   zd:
     build:
-      context: .
-      dockerfile: Dockerfile
-    #image: ghcr.io/z-shell/zd:latest
+      context: ..
+      dockerfile: docker/Dockerfile
     stdin_open: true
     tty: true
     container_name: zd
     environment:
       - TERM=xterm-256color
     volumes:
-      - $PWD:/src
+      - $PWD/..:/src
     hostname: zi@docker
