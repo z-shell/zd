@@ -1,24 +1,11 @@
-ARG VERSION=edge
-FROM alpine:$VERSION
+ARG ALPINE_VERSION=edge
+FROM alpine:${ALPINE_VERSION} AS base
+
 LABEL maintainer="Z-Shell Community"
 LABEL email="team@zshell.dev"
 
-ARG DIR
-ARG PUID
-ARG PGID
-ARG TERM
-ARG ZUSER
-ARG ZHOST
-# Bump this ARG when a new Go release is available
-ARG GO_VERSION=1.26.1
-
-ENV DIR=${DIR:-/static}
-ENV PUID=${PUID:-1000}
-ENV PGID=${PGID:-1000}
-ENV TERM=${TERM:-xterm}
-ENV ZUSER=${ZUSER:-user}
-ENV HOST=$ZHOST
-ENV PATH="/usr/local/go/bin:$PATH"
+ARG TERM=xterm
+ENV TERM=${TERM}
 
 RUN set -ex && apk --no-cache add \
   alpine-zsh-config \
@@ -33,41 +20,62 @@ RUN set -ex && apk --no-cache add \
   bash \
   curl \
   sudo \
+  go \
   zsh \
   git \
   vim \
   jq
 
-# Install Go from upstream — avoids the outdated apk package
+# Install zunit and its helpers into /usr/local/bin at build time.
 RUN set -ex \
-  && ARCH="$(uname -m)" \
-  && case "$ARCH" in \
-       x86_64)        GOARCH="amd64" ;; \
-       aarch64)       GOARCH="arm64" ;; \
-       armv6l|armv7l) GOARCH="armv6l" ;; \
-       *)             echo "Unsupported arch: $ARCH" && exit 1 ;; \
-     esac \
-  && GO_TARBALL="go${GO_VERSION}.linux-${GOARCH}.tar.gz" \
-  && rm -rf /usr/local/go \
-  && curl -fsSL "https://go.dev/dl/${GO_TARBALL}" -o "/tmp/${GO_TARBALL}" \
-  && EXPECTED_SHA256="$(curl -fsSL 'https://go.dev/dl/?mode=json&include=all' \
-       | jq -r --arg f "${GO_TARBALL}" '.[].files[] | select(.filename==$f) | .sha256')" \
-  && [ -n "${EXPECTED_SHA256}" ] || { echo "Failed to retrieve SHA256 for ${GO_TARBALL}" && exit 1; } \
-  && echo "${EXPECTED_SHA256}  /tmp/${GO_TARBALL}" | sha256sum -c - \
-  && tar -C /usr/local -xzf "/tmp/${GO_TARBALL}" \
-  && rm -f "/tmp/${GO_TARBALL}" \
-  && go version
+  && git clone --depth 1 https://github.com/zdharma/zunit.git /tmp/zunit.git \
+  && cd /tmp/zunit.git && ./build.zsh \
+  && mv /tmp/zunit.git/zunit /usr/local/bin/zunit \
+  && curl -fsSL 'https://raw.githubusercontent.com/zdharma/revolver/v0.2.4/revolver' \
+       > /usr/local/bin/revolver \
+  && curl -fsSL 'https://raw.githubusercontent.com/zdharma/color/d8f91ab5fcfceb623ae45d3333ad0e543775549c/color.zsh' \
+       > /usr/local/bin/color \
+  && chmod u+x /usr/local/bin/{color,revolver,zunit} \
+  && rm -rf /tmp/zunit.git
 
-WORKDIR $DIR
-COPY . .
-RUN chmod +x entrypoint.sh && ./entrypoint.sh
+FROM base AS test
 
-VOLUME ["/src", "/data"]
-COPY --chown=$ZUSER . /src
+ARG ZUSER=user
+ARG PUID=1000
+ARG PGID=1000
+ARG ZHOST=zi-docker
 
-USER $ZUSER
-WORKDIR /home/$ZUSER
+ENV PUID=${PUID}
+ENV PGID=${PGID}
+ENV ZUSER=${ZUSER}
+ENV HOST=${ZHOST}
 
-RUN /tmp/install.sh -i skip
+COPY docker/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh && /entrypoint.sh
+
+# Install zi as $ZUSER at build time — no network calls at test time.
+USER ${ZUSER}
+ARG ZI_BRANCH=main
+RUN zsh -c "$(curl -fsSL https://install.zshell.dev)" -- -i skip
+
+# Optionally install a specific Zsh version via zi pack at build time.
+# Leave ZSH_VERSION empty for the :latest image (uses Alpine's zsh).
+ARG ZSH_VERSION=
+RUN [ -z "${ZSH_VERSION}" ] || \
+    zsh -c "source \${HOME}/.zi/bin/zi.zsh && zi pack\"${ZSH_VERSION}\" for zsh"
+
+# Switch back to root for COPY operations.
+USER root
+COPY docker/zshenv /home/${ZUSER}/.zshenv
+COPY docker/zshrc  /home/${ZUSER}/.zshrc
+COPY utils.zsh     /src/utils.zsh
+COPY tests/        /src/tests/
+RUN chown -R ${PUID}:${PGID} /home/${ZUSER}/.zshenv /home/${ZUSER}/.zshrc /src
+
+# VOLUME declared after all COPYs — declaring before COPY silently discards copied files.
+VOLUME ["/data"]
+
+USER ${ZUSER}
+WORKDIR /home/${ZUSER}
 
 CMD ["zsh", "-il"]
