@@ -1,0 +1,47 @@
+name: "ZUnit (native)"
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "tests/**"
+      - "utils.zsh"
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: "0 12 * * 1"
+  workflow_dispatch:
+
+jobs:
+  zunit:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        file: [annexes, ice, packages, plugins, snippets]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install zsh
+        run: sudo apt-get update && sudo apt-get install -yq zsh
+
+      - name: Install zunit
+        run: |
+          mkdir -p bin
+          curl -fsSL 'https://raw.githubusercontent.com/zdharma/revolver/v0.2.4/revolver' > bin/revolver
+          curl -fsSL 'https://raw.githubusercontent.com/zdharma/color/d8f91ab5fcfceb623ae45d3333ad0e543775549c/color.zsh' > bin/color
+          git clone --depth 1 https://github.com/zdharma/zunit.git zunit.git
+          cd zunit.git && ./build.zsh && cd ..
+          mv zunit.git/zunit bin/
+          chmod u+x bin/{color,revolver,zunit}
+
+      - name: Install zi
+        run: zsh -c "$(curl -fsSL https://install.zshell.dev)" -- -i skip
+
+      - name: "ZUnit: ${{ matrix.file }}"
+        run: |
+          export PATH="$PWD/bin:$PATH"
+          export TERM=xterm
+          export ZI_BIN="${HOME}/.zi/bin"
+          export ZI_DATA="${RUNNER_TEMP}/zunit"
+          zunit --tap --verbose "tests/${{ matrix.file }}.zunit"
