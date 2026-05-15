@@ -1,7 +1,7 @@
 # -*- mode: makefile; -*-
 
 SHELL      := bash
-ZI_BIN     ?= $(HOME)/.zi/bin
+ZI_BIN     ?= $(HOME)/.local/share/zi/bin
 ZI_DATA    ?= /tmp/zunit-local
 IMAGE      ?= ghcr.io/z-shell/zd
 TAG        ?= latest

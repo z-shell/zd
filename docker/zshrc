@@ -4,7 +4,7 @@
 # Source zi (pre-installed during docker build).
 typeset -gA ZI
 ZI[HOME_DIR]="${ZI_DATA:-/data}"
-source "${HOME}/.zi/bin/zi.zsh"
+source "${ZI_BIN}/zi.zsh"
 autoload -Uz _zi
 (( ${+_comps} )) && _comps[zi]=_zi
 

@@ -27,15 +27,16 @@ RUN set -ex && apk --no-cache add \
   jq
 
 # Install zunit and its helpers into /usr/local/bin at build time.
+RUN git clone --depth 1 https://github.com/zdharma/zunit.git /tmp/zunit.git
+WORKDIR /tmp/zunit.git
 RUN set -ex \
-  && git clone --depth 1 https://github.com/zdharma/zunit.git /tmp/zunit.git \
-  && cd /tmp/zunit.git && ./build.zsh \
+  && ./build.zsh \
   && mv /tmp/zunit.git/zunit /usr/local/bin/zunit \
   && curl -fsSL 'https://raw.githubusercontent.com/zdharma/revolver/v0.2.4/revolver' \
        > /usr/local/bin/revolver \
   && curl -fsSL 'https://raw.githubusercontent.com/zdharma/color/d8f91ab5fcfceb623ae45d3333ad0e543775549c/color.zsh' \
        > /usr/local/bin/color \
-  && chmod u+x /usr/local/bin/{color,revolver,zunit} \
+  && chmod u+x /usr/local/bin/color /usr/local/bin/revolver /usr/local/bin/zunit \
   && rm -rf /tmp/zunit.git
 
 FROM base AS test
@@ -62,7 +63,7 @@ RUN zsh -c "$(curl -fsSL https://install.zshell.dev)" -- -i skip
 # Leave ZSH_VERSION empty for the :latest image (uses Alpine's zsh).
 ARG ZSH_VERSION=
 RUN [ -z "${ZSH_VERSION}" ] || \
-    zsh -c "source \${HOME}/.zi/bin/zi.zsh && zi pack\"${ZSH_VERSION}\" for zsh"
+  zsh -c "source \${XDG_DATA_HOME:-\${HOME}/.local/share}/zi/bin/zi.zsh && zi pack\"${ZSH_VERSION}\" for zsh"
 
 # Switch back to root for COPY operations.
 USER root

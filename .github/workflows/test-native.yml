@@ -62,9 +62,10 @@ jobs:
           ZI_REF: ${{ inputs.zi_ref }}
         run: |
           if [[ -n "$ZI_REPO" ]]; then
+            zi_home="${XDG_DATA_HOME:-${HOME}/.local/share}/zi"
             git clone --depth 1 --branch "${ZI_REF:-main}" \
-              "https://github.com/${ZI_REPO}.git" "${HOME}/.zi/bin"
-            mkdir -p "${HOME}/.zi"/{cache,completions,plugins,snippets}
+              "https://github.com/${ZI_REPO}.git" "${zi_home}/bin"
+            mkdir -p "${zi_home}"/{cache,completions,plugins,snippets}
           else
             zsh -c "$(curl -fsSL https://install.zshell.dev)" -- -i skip
           fi
@@ -73,6 +74,6 @@ jobs:
         run: |
           export PATH="$PWD/bin:$PATH"
           export TERM=xterm
-          export ZI_BIN="${HOME}/.zi/bin"
+          export ZI_BIN="${XDG_DATA_HOME:-${HOME}/.local/share}/zi/bin"
           export ZI_DATA="${RUNNER_TEMP}/zunit"
           zunit --tap --verbose "tests/${{ matrix.file }}.zunit"

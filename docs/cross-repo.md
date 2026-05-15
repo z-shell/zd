@@ -29,17 +29,17 @@ jobs:
     name: "ZUnit suite"
     uses: z-shell/zd/.github/workflows/test-native.yml@main
     with:
-      zi_repo: z-shell/zi        # the repo being tested
-      zi_ref: ${{ github.sha }}  # the exact commit under test
+      zi_repo: z-shell/zi # the repo being tested
+      zi_ref: ${{ github.sha }} # the exact commit under test
 ```
 
 **What each field does:**
 
-| Field | Purpose |
-|---|---|
-| `uses: z-shell/zd/.github/workflows/test-native.yml@main` | Calls the reusable workflow at the `main` ref of `zd` |
-| `zi_repo: z-shell/zi` | Tells `zd` to clone this repo instead of using the default install |
-| `zi_ref: ${{ github.sha }}` | Pins to the exact commit that triggered the caller's workflow |
+| Field                                                     | Purpose                                                            |
+| --------------------------------------------------------- | ------------------------------------------------------------------ |
+| `uses: z-shell/zd/.github/workflows/test-native.yml@main` | Calls the reusable workflow at the `main` ref of `zd`              |
+| `zi_repo: z-shell/zi`                                     | Tells `zd` to clone this repo instead of using the default install |
+| `zi_ref: ${{ github.sha }}`                               | Pins to the exact commit that triggered the caller's workflow      |
 
 The caller's `GITHUB_TOKEN` is used automatically — no additional secrets are required. Both repositories must be public.
 
@@ -47,10 +47,10 @@ The caller's `GITHUB_TOKEN` is used automatically — no additional secrets are 
 
 ## Input reference
 
-| Input | Type | Required | Default | Description |
-|---|---|---|---|---|
-| `zi_repo` | `string` | No | `""` | GitHub repo for Zi in `owner/name` format. When empty, the default install script is used. |
-| `zi_ref` | `string` | No | `main` | Branch name, tag, or full commit SHA to check out. |
+| Input     | Type     | Required | Default | Description                                                                                |
+| --------- | -------- | -------- | ------- | ------------------------------------------------------------------------------------------ |
+| `zi_repo` | `string` | No       | `""`    | GitHub repo for Zi in `owner/name` format. When empty, the default install script is used. |
+| `zi_ref`  | `string` | No       | `main`  | Branch name, tag, or full commit SHA to check out.                                         |
 
 ---
 

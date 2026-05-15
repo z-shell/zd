@@ -5,9 +5,9 @@ on:
   push:
     tags: ["v*.*.*"]
     branches: [main, next]
-    paths: [./zi/**]
+    paths: [zi/**]
   pull_request:
-    paths: [./zi/**]
+    paths: [zi/**]
   workflow_dispatch: {}
 
 jobs:

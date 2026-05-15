@@ -116,8 +116,8 @@ Note how `owner/name` becomes `owner---name` in the filesystem path — Zi repla
 
 `zi_test` receives a string that is embedded into an inner Zsh process. There are two shells involved: the outer ZUnit shell and the inner Zsh started by `zi_test`.
 
-- **Single quotes** — the string is passed literally; `$VAR` references resolve in the *inner* shell (after Zi is sourced). This is the default and is what you want for most tests.
-- **Double quotes** — the string is interpolated by the *outer* shell before being passed in. Use this when you want to inject an outer variable's value.
+- **Single quotes** — the string is passed literally; `$VAR` references resolve in the _inner_ shell (after Zi is sourced). This is the default and is what you want for most tests.
+- **Double quotes** — the string is interpolated by the _outer_ shell before being passed in. Use this when you want to inject an outer variable's value.
 
 ```zsh
 # Correct — expands $my_plugin in the outer (ZUnit) shell
@@ -153,16 +153,16 @@ This means tests can be run in any order and do not depend on each other.
 1. Create `tests/<name>.zunit` following the anatomy above.
 2. Add `<name>` to the matrix in `.github/workflows/test-native.yml`:
 
-```yaml
-matrix:
-  file: [annexes, ice, packages, plugins, snippets, <name>]
-```
+   ```yaml
+   matrix:
+     file: [annexes, ice, packages, plugins, snippets, <name>]
+   ```
 
 3. Verify locally before pushing:
 
-```sh
-make test FILE=<name>
-```
+   ```sh
+   make test FILE=<name>
+   ```
 
 The new suite will be picked up automatically by the Docker matrix workflow (`test-matrix.yml`) — it iterates over all `*.zunit` files, so no change is needed there.
 
@@ -170,14 +170,14 @@ The new suite will be picked up automatically by the Docker matrix workflow (`te
 
 ## Common assertion patterns
 
-| Assertion | Meaning |
-|---|---|
-| `assert $state equals 0` | Command exited successfully |
-| `assert $state equals 255` | Command exited with a specific non-zero code |
-| `assert $state not_equal_to 0` | Command failed (any non-zero code) |
-| `assert "$output" contains "text"` | Output includes the substring |
-| `assert "$artifact" is_file` | Path exists and is a regular file |
-| `assert "$artifact" is_executable` | Path exists and is executable |
-| `assert "$artifact" is_readable` | Path exists and is readable |
+| Assertion                          | Meaning                                      |
+| ---------------------------------- | -------------------------------------------- |
+| `assert $state equals 0`           | Command exited successfully                  |
+| `assert $state equals 255`         | Command exited with a specific non-zero code |
+| `assert $state not_equal_to 0`     | Command failed (any non-zero code)           |
+| `assert "$output" contains "text"` | Output includes the substring                |
+| `assert "$artifact" is_file`       | Path exists and is a regular file            |
+| `assert "$artifact" is_executable` | Path exists and is executable                |
+| `assert "$artifact" is_readable`   | Path exists and is readable                  |
 
 Full ZUnit assertion reference: <https://zunit.xyz/docs/writing-tests/assertions/>

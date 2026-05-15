@@ -4,7 +4,7 @@
 
 ## Architecture
 
-```
+```text
                     ┌─────────────────────────────────┐
                     │         test-native.yml          │
   push / PR ───────▶│  ubuntu-latest · zsh from apt   │
@@ -48,24 +48,24 @@ docker run --rm -it ghcr.io/z-shell/zd:zsh-5.9
 
 ## Documentation
 
-| Topic | File |
-|---|---|
-| Local testing — Makefile targets, env vars, Docker | [docs/local-testing.md](docs/local-testing.md) |
-| CI workflows — triggers, inputs, caching | [docs/ci-workflows.md](docs/ci-workflows.md) |
-| Cross-repo integration — test your zi PR from another repo | [docs/cross-repo.md](docs/cross-repo.md) |
-| Writing tests — zi_test, assertions, adding suites | [docs/writing-tests.md](docs/writing-tests.md) |
+| Topic                                                      | File                                           |
+| ---------------------------------------------------------- | ---------------------------------------------- |
+| Local testing — Makefile targets, env vars, Docker         | [docs/local-testing.md](docs/local-testing.md) |
+| CI workflows — triggers, inputs, caching                   | [docs/ci-workflows.md](docs/ci-workflows.md)   |
+| Cross-repo integration — test your zi PR from another repo | [docs/cross-repo.md](docs/cross-repo.md)       |
+| Writing tests — zi_test, assertions, adding suites         | [docs/writing-tests.md](docs/writing-tests.md) |
 
 ## Available Image Tags
 
-| Tag | Zsh version |
-|---|---|
-| `latest` | Alpine's default Zsh |
-| `zsh-5.5.1` | 5.5.1 |
-| `zsh-5.6.2` | 5.6.2 |
-| `zsh-5.7.1` | 5.7.1 |
-| `zsh-5.8` | 5.8 |
-| `zsh-5.8.1` | 5.8.1 |
-| `zsh-5.9` | 5.9 |
+| Tag         | Zsh version          |
+| ----------- | -------------------- |
+| `latest`    | Alpine's default Zsh |
+| `zsh-5.5.1` | 5.5.1                |
+| `zsh-5.6.2` | 5.6.2                |
+| `zsh-5.7.1` | 5.7.1                |
+| `zsh-5.8`   | 5.8                  |
+| `zsh-5.8.1` | 5.8.1                |
+| `zsh-5.9`   | 5.9                  |
 
 Images are published to `ghcr.io/z-shell/zd` on every push to `main` and on a weekly schedule.
 

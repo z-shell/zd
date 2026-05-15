@@ -5,11 +5,13 @@ The Makefile provides four targets that cover the full local workflow: running t
 ## Prerequisites
 
 **For native tests (`make test`):**
+
 - Zsh installed (`zsh --version`)
-- Zi installed — default location `~/.zi/bin`. Override with `ZI_BIN=` if installed elsewhere.
+- Zi installed — default location `${XDG_DATA_HOME:-$HOME/.local/share}/zi/bin`. Override with `ZI_BIN=` if installed elsewhere.
 - Internet access on first run (downloads `zunit` into `bin/`)
 
 **For Docker targets (`make run`, `make shell`, `make build`):**
+
 - Docker running locally
 - The prebuilt image pulled (`docker pull ghcr.io/z-shell/zd:latest`) — or build it with `make build`
 
@@ -23,7 +25,7 @@ make test
 
 On the first run, `make test` automatically installs `zunit`, `revolver`, and `color` into `bin/`. This mirrors exactly what the CI workflow does. Subsequent runs skip the install step (the `bin/zunit` file already exists).
 
-```
+```text
 Installing zunit into bin/ ...
 Done.
 ==> tests/annexes.zunit
@@ -102,7 +104,7 @@ $ make shell
 user@zi-docker ~ $ zi light junegunn/fzf
 ...
 user@zi-docker ~ $ which fzf
-~/.zi/polaris/bin/fzf
+/data/polaris/bin/fzf
 user@zi-docker ~ $ exit
 ```
 
@@ -135,11 +137,11 @@ make shell IMAGE=my-zd TAG=dev
 
 ## Variable reference
 
-| Variable | Default | Purpose |
-|---|---|---|
-| `ZI_BIN` | `~/.zi/bin` | Path to the Zi binary directory (native tests) |
-| `ZI_DATA` | `/tmp/zunit-local` | Data directory for plugins/snippets during tests |
-| `IMAGE` | `ghcr.io/z-shell/zd` | Docker image name |
-| `TAG` | `latest` | Docker image tag |
-| `FILE` | _(all suites)_ | Single `.zunit` suite name to run (without extension) |
-| `ZSH_VERSION` | _(empty)_ | Zsh version to bake into a local Docker build |
+| Variable      | Default                 | Purpose                                               |
+| ------------- | ----------------------- | ----------------------------------------------------- |
+| `ZI_BIN`      | `~/.local/share/zi/bin` | Path to the Zi binary directory (native tests)        |
+| `ZI_DATA`     | `/tmp/zunit-local`      | Data directory for plugins/snippets during tests      |
+| `IMAGE`       | `ghcr.io/z-shell/zd`    | Docker image name                                     |
+| `TAG`         | `latest`                | Docker image tag                                      |
+| `FILE`        | _(all suites)_          | Single `.zunit` suite name to run (without extension) |
+| `ZSH_VERSION` | _(empty)_               | Zsh version to bake into a local Docker build         |

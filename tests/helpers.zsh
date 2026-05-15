@@ -12,7 +12,7 @@
 # caller: zi_test "zi light ${my_plugin}"
 zi_test() {
   local script=$1
-  local _zi_bin="${ZI_BIN:-${HOME}/.zi/bin}"
+  local _zi_bin="${ZI_BIN:-${XDG_DATA_HOME:-${HOME}/.local/share}/zi/bin}"
   local _zi_data="${ZI_DATA:-${TMPDIR:-/tmp}/zunit}"
   run zsh -c "
     typeset -gxU path

@@ -4,13 +4,13 @@
 
 ## Overview
 
-| Workflow | File | Trigger | Purpose |
-|---|---|---|---|
-| ZUnit (native) | `test-native.yml` | push, PR, schedule, dispatch, `workflow_call` | Fast ZUnit suite on ubuntu-latest |
-| ZUnit (Zsh matrix) | `test-matrix.yml` | weekly, dispatch | Zsh 5.5.1–5.9 compat via Docker |
-| Zi Docker | `docker.yml` | push, tags, schedule | Build and publish multi-arch images |
-| Zsh -n | `zsh-n.yml` | push, PR | Syntax check all `.zsh` files |
-| CodeQL | `codeql.yml` | push, PR, schedule | Security scanning |
+| Workflow           | File              | Trigger                                       | Purpose                             |
+| ------------------ | ----------------- | --------------------------------------------- | ----------------------------------- |
+| ZUnit (native)     | `test-native.yml` | push, PR, schedule, dispatch, `workflow_call` | Fast ZUnit suite on ubuntu-latest   |
+| ZUnit (Zsh matrix) | `test-matrix.yml` | weekly, dispatch                              | Zsh 5.5.1–5.9 compat via Docker     |
+| Zi Docker          | `docker.yml`      | push, tags, schedule                          | Build and publish multi-arch images |
+| Zsh -n             | `zsh-n.yml`       | push, PR                                      | Syntax check all `.zsh` files       |
+| CodeQL             | `codeql.yml`      | push, PR, schedule                            | Security scanning                   |
 
 ---
 
@@ -30,19 +30,19 @@ The primary CI workflow. Runs on every push to `main` (when `tests/**` or `utils
 
 **Environment variables set by the workflow:**
 
-| Variable | Value | Purpose |
-|---|---|---|
-| `PATH` | `$PWD/bin:$PATH` | Makes `zunit`, `revolver`, `color` available |
-| `ZI_BIN` | `$HOME/.zi/bin` | Points `zi_test` at the installed Zi binary |
-| `ZI_DATA` | `$RUNNER_TEMP/zunit` | Isolated data dir; wiped between tests |
-| `TERM` | `xterm` | Required for Zi's output formatting |
+| Variable  | Value                       | Purpose                                      |
+| --------- | --------------------------- | -------------------------------------------- |
+| `PATH`    | `$PWD/bin:$PATH`            | Makes `zunit`, `revolver`, `color` available |
+| `ZI_BIN`  | `$HOME/.local/share/zi/bin` | Points `zi_test` at the installed Zi binary  |
+| `ZI_DATA` | `$RUNNER_TEMP/zunit`        | Isolated data dir; wiped between tests       |
+| `TERM`    | `xterm`                     | Required for Zi's output formatting          |
 
 **Manual dispatch inputs** (available in the GitHub Actions UI):
 
-| Input | Default | Description |
-|---|---|---|
+| Input     | Default   | Description                                                               |
+| --------- | --------- | ------------------------------------------------------------------------- |
 | `zi_repo` | _(empty)_ | GitHub repo for Zi (`owner/name`). Empty uses the default install script. |
-| `zi_ref` | `main` | Branch, tag, or SHA to install. |
+| `zi_ref`  | `main`    | Branch, tag, or SHA to install.                                           |
 
 ---
 
@@ -52,16 +52,17 @@ Runs weekly (Wednesday 03:00 UTC) and on manual dispatch. Not triggered by push 
 
 **Matrix:** six parallel jobs, one per Zsh version:
 
-| Version | Tag suffix |
-|---|---|
-| 5.5.1 | `zsh-5.5.1` |
-| 5.6.2 | `zsh-5.6.2` |
-| 5.7.1 | `zsh-5.7.1` |
-| 5.8 | `zsh-5.8` |
-| 5.8.1 | `zsh-5.8.1` |
-| 5.9 | `zsh-5.9` |
+| Version | Tag suffix  |
+| ------- | ----------- |
+| 5.5.1   | `zsh-5.5.1` |
+| 5.6.2   | `zsh-5.6.2` |
+| 5.7.1   | `zsh-5.7.1` |
+| 5.8     | `zsh-5.8`   |
+| 5.8.1   | `zsh-5.8.1` |
+| 5.9     | `zsh-5.9`   |
 
 **Per job:**
+
 1. Build the Docker image for that Zsh version using `docker/setup-buildx-action` and `docker/build-push-action`, passing `ZSH_VERSION` as a build arg
 2. Layer caching via `type=gha` — only changed layers rebuild on subsequent runs
 3. Run all test files in a single container invocation:
@@ -84,6 +85,7 @@ Running all suites in one container (rather than one container per suite) keeps 
 Builds and publishes multi-architecture images (`linux/amd64`, `linux/arm64`) to `ghcr.io/z-shell/zd`.
 
 **Triggers:**
+
 - Push to `main` touching `docker/**`, `scripts/**`, `tests/**`, or `lib/**`
 - Tag push matching `v*.*.*`
 - Weekly schedule (Wednesday 03:00 UTC)
@@ -103,11 +105,11 @@ Layer caching uses `type=gha` for both jobs.
 
 All workflows share a common set of variables. The table below covers every variable used across the three main workflows.
 
-| Variable | Workflow | Default | Description |
-|---|---|---|---|
-| `TERM` | native, matrix | `xterm` | Terminal type required by Zi output |
-| `ZI_BIN` | native | `$HOME/.zi/bin` | Path to Zi binary directory |
-| `ZI_DATA` | native, matrix | `$RUNNER_TEMP/zunit` | Plugin/snippet data directory |
-| `ZI_REPO` | native (input) | `z-shell/zi` | Zi GitHub repo when using `workflow_call` |
-| `ZI_REF` | native (input) | `main` | Zi branch/tag/SHA when using `workflow_call` |
-| `ZSH_VERSION` | matrix, docker | _(empty)_ | Zsh version to bake into the Docker image |
+| Variable      | Workflow       | Default                     | Description                                  |
+| ------------- | -------------- | --------------------------- | -------------------------------------------- |
+| `TERM`        | native, matrix | `xterm`                     | Terminal type required by Zi output          |
+| `ZI_BIN`      | native         | `$HOME/.local/share/zi/bin` | Path to Zi binary directory                  |
+| `ZI_DATA`     | native, matrix | `$RUNNER_TEMP/zunit`        | Plugin/snippet data directory                |
+| `ZI_REPO`     | native (input) | `z-shell/zi`                | Zi GitHub repo when using `workflow_call`    |
+| `ZI_REF`      | native (input) | `main`                      | Zi branch/tag/SHA when using `workflow_call` |
+| `ZSH_VERSION` | matrix, docker | _(empty)_                   | Zsh version to bake into the Docker image    |
