@@ -5,8 +5,7 @@
 `zd` is a **Zi Docker environment** — an Alpine Linux–based Docker image that provides a ready-to-use Zsh + [Zi](https://github.com/z-shell/zi) plugin-manager environment. The repository contains:
 
 - The `Dockerfile` and supporting shell scripts that build the image.
-- ZUnit integration tests that exercise Zi plugin/snippet/package installation inside a running container.
-- A `run.sh` helper that launches the container with sensible defaults.
+- CI/CD workflows that build multi-architecture images and verify functionality.
 
 ## Repository layout
 
@@ -14,33 +13,14 @@
 docker/
   Dockerfile          # Alpine-based image definition
   entrypoint.sh       # POSIX sh setup script run at image-build time (root)
-  init.zsh            # Optional user-supplied init script sourced on startup
   utils.zsh           # Zsh helper functions (prepare_system, initiate_system, zi::*)
   zshenv              # Zsh env bootstrap (ZI config, PATH additions)
   zshrc               # Zsh startup config — sources utils.zsh and calls prepare_system/initiate_system
-  build.sh            # Bash helper to docker-build the image with appropriate ARGs
-  run.sh              # Bash helper to docker-run the image
-  zunit.sh            # Bash wrapper that invokes `zunit run --verbose`
   docker-compose.yml  # Compose file for interactive use
-  tests/
-    setup.zsh         # ZUnit @setup: exports DATA_DIR, PLUGINS_DIR, SNIPPETS_DIR, ZPFX
-    teardown.zsh      # ZUnit @teardown: removes DATA_DIR
-    plugins.zunit     # ZUnit tests: fzf, direnv, diff-so-fancy plugin installs
-    annexes.zunit     # ZUnit tests: Zi annex loading
-    ice.zunit         # ZUnit tests: Zi ice-modifier syntax
-    packages.zunit    # ZUnit tests: Zi pack installs
-    snippets.zunit    # ZUnit tests: Zi snippet loading
 .github/
   workflows/
     docker.yml        # CI: multi-arch Docker build matrix (versioned Zsh + latest)
-    zunit.yml         # CI: ZUnit test matrix (one job per *.zunit file)
     codeql.yml        # CodeQL security scanning
-    labeler.yml       # Auto-labelling PRs
-    pr-labels.yml     # PR label sync
-    stale.yml         # Stale issue/PR management
-    lock.yml          # Lock closed issues/PRs
-    rebase.yml        # Auto-rebase
-    sync-labels.yml   # Sync labels from config
     zsh-n.yml         # Zsh -n (syntax check) workflow
   ISSUE_TEMPLATE/     # GitHub issue templates
   PULL_REQUEST_TEMPLATE.md
@@ -53,8 +33,7 @@ docker/
 - **`entrypoint.sh`** is POSIX `sh` (shebang `#!/usr/bin/env sh`). It runs as root inside the Alpine build context.
   - Use `sed -i -r` (BusyBox `sed` extended-regex flag) — **not** `-E`, which is unsupported by BusyBox.
   - Never use Bashisms (`[[ ]]`, arrays, `local` with assignment, etc.) in this file.
-- **`run.sh`**, **`build.sh`**, **`zunit.sh`** are Bash (shebang `#!/usr/bin/env bash`). 2-space indentation, `# vim: ft=bash sw=2 ts=2 et` modeline.
-- **Zsh files** (`utils.zsh`, `zshrc`, `zshenv`, `*.zunit`) use 2-space indentation and the modeline `# vim: ft=zsh sw=2 ts=2 et`.
+- **Zsh files** (`utils.zsh`, `zshrc`, `zshenv`) use 2-space indentation and the modeline `# vim: ft=zsh sw=2 ts=2 et`.
 - All text files: UTF-8, LF line endings. Default indent is 2 spaces, except:
   - `Makefile*`: tab indentation with `indent_size=4`.
   - `*.py`, `*.rb`: 4-space indentation.
@@ -68,22 +47,12 @@ docker/
 - Go is installed from `https://go.dev/dl/` (not from `apk`) to get a current release. Bump `ARG GO_VERSION` when a new Go release is available; SHA256 is verified via the `https://go.dev/dl/?mode=json&include=all` API.
 - `LABEL` values must be plain strings — no template syntax like `<%= ... =>`.
 
-### ZUnit tests
-- Each `*.zunit` file begins with `@setup { load setup; setup }` and `@teardown { load teardown; teardown }`.
-- Every assertion for a binary artifact must include both `assert "$artifact" is_file` **and** `assert "$artifact" is_executable`.
-- Use `local artifact=...` for the first artifact in a test; reassign with `artifact=...` (no `local`) for subsequent ones in the same test body.
-- Tests run against the published container image via `run.sh --wrap --debug --zunit`.
-
-### `run.sh` helper
-- Use `printf '%s\n' "$*"` (not a custom `say` function) when writing content to a temp file or printing a file path.
-- `create_init_config_file` writes `$*` to a `mktemp` file and prints the path on stdout.
 
 ## CI / workflows
 
 | Workflow | Trigger | What it does |
 |---|---|---|
 | `docker.yml` | push/PR to `main` touching `docker/**`, scheduled Wed 03:00 UTC | Builds multi-arch image (`linux/amd64`, `linux/arm64`) for Zsh 5.5.1–5.9 matrix + `latest` tag |
-| `zunit.yml` | push to `main` touching `*.zunit`, scheduled Mon/Wed/Fri/Sun 12:00 UTC, `workflow_dispatch` | Runs each `*.zunit` file as a separate matrix job |
 | `zsh-n.yml` | Zsh `-n` syntax check | Checks all Zsh files for syntax errors |
 
 ### Common build failure causes
@@ -95,9 +64,8 @@ docker/
 ## Development workflow
 
 1. Edit files in `docker/`.
-2. Build locally: `cd docker && ./build.sh` (or `docker compose build`).
-3. Run ZUnit tests: `./docker/zunit.sh` (requires a built image).
-4. Submit a PR — CI will run both `docker.yml` and `zunit.yml`.
+2. Build locally: `docker compose build`.
+3. Submit a PR — CI will run Docker build and syntax checks.
 
 ## Security notes
 
