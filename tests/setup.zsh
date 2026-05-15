@@ -10,7 +10,7 @@ setup() {
     color magenta "ZI_DATA=${ZI_DATA}"
   } >&2
 
-  # Wipe plugin/snippet state between tests; keep the dir itself.
-  rm -rf "${ZI_DATA:?}"/*
+  # Wipe and recreate between tests. Direct rm avoids glob-no-match errors.
+  rm -rf "${ZI_DATA:?}"
   mkdir -p "${ZI_DATA}"
 }

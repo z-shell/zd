@@ -55,8 +55,8 @@ jobs:
         with:
           push: ${{ github.event.number == 0 }}
           file: ./docker/Dockerfile
-          context: ./docker
-          build-args: ZI_ZSH_VERSION=${{ matrix.zsh_version }}
+          context: .
+          build-args: ZSH_VERSION=${{ matrix.zsh_version }}
           tags: ghcr.io/${{ github.repository }}:zsh-${{ matrix.zsh_version }}
           platforms: linux/amd64,linux/arm64
           cache-from: type=gha
@@ -87,7 +87,7 @@ jobs:
         with:
           push: true
           file: ./docker/Dockerfile
-          context: ./docker
+          context: .
           tags: ghcr.io/${{ github.repository }}:latest
           platforms: linux/amd64,linux/arm64
           cache-from: type=gha

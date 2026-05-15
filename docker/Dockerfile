@@ -69,7 +69,7 @@ RUN [ -z "${ZSH_VERSION}" ] || \
 USER root
 COPY docker/zshenv /home/${ZUSER}/.zshenv
 COPY docker/zshrc  /home/${ZUSER}/.zshrc
-COPY utils.zsh     /src/utils.zsh
+COPY docker/utils.zsh /src/utils.zsh
 COPY tests/        /src/tests/
 RUN chown -R ${PUID}:${PGID} /home/${ZUSER}/.zshenv /home/${ZUSER}/.zshrc /src
 
