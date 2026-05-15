@@ -1,5 +1,8 @@
 name: "ZUnit (native)"
 
+permissions:
+  contents: read
+
 on:
   push:
     branches: [main]
