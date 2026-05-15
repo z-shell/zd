@@ -11,6 +11,27 @@ on:
   schedule:
     - cron: "0 12 * * 1"
   workflow_dispatch:
+    inputs:
+      zi_repo:
+        description: "GitHub repo for zi (owner/name). Leave empty to use the default install script."
+        required: false
+        default: ""
+      zi_ref:
+        description: "Branch, tag, or SHA of zi to test."
+        required: false
+        default: "main"
+  workflow_call:
+    inputs:
+      zi_repo:
+        description: "GitHub repo for zi (owner/name). Leave empty to use the default install script."
+        type: string
+        required: false
+        default: ""
+      zi_ref:
+        description: "Branch, tag, or SHA of zi to test."
+        type: string
+        required: false
+        default: "main"
 
 jobs:
   zunit:
@@ -36,7 +57,17 @@ jobs:
           chmod u+x bin/{color,revolver,zunit}
 
       - name: Install zi
-        run: zsh -c "$(curl -fsSL https://install.zshell.dev)" -- -i skip
+        env:
+          ZI_REPO: ${{ inputs.zi_repo }}
+          ZI_REF: ${{ inputs.zi_ref }}
+        run: |
+          if [[ -n "$ZI_REPO" ]]; then
+            git clone --depth 1 --branch "${ZI_REF:-main}" \
+              "https://github.com/${ZI_REPO}.git" "${HOME}/.zi/bin"
+            mkdir -p "${HOME}/.zi"/{cache,completions,plugins,snippets}
+          else
+            zsh -c "$(curl -fsSL https://install.zshell.dev)" -- -i skip
+          fi
 
       - name: "ZUnit: ${{ matrix.file }}"
         run: |
