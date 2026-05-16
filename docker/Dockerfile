@@ -38,7 +38,7 @@ RUN set -ex \
        git clone --depth 1 --branch "zsh-${ZSH_VERSION}" \
          https://github.com/zsh-users/zsh.git /tmp/zsh-src \
        && cd /tmp/zsh-src \
-       && [ -f configure ] || { autoheader && autoconf; } \
+       && [ -f configure ] || autoreconf --install --force \
        && cp "$(automake --print-libdir)/config.guess" config.guess \
        && cp "$(automake --print-libdir)/config.sub" config.sub \
        && sed -i -E 's/\b(bool|num|str)(codes|names|fnames)\b/zsh_\1\2/g' Src/Modules/termcap.c \
