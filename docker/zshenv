@@ -3,8 +3,5 @@
 
 export TERM=${TERM:-xterm-256color}
 export SHELL=${SHELL:-${commands[zsh]}}
-
-typeset -Ag ZI
-export ZI[HOME_DIR]=${ZI_HOME_DIR:-/data}
-export ZI[BIN_DIR]=${ZI_BIN_DIR:-$HOME/.zi/bin}
-
+export ZI_DATA=${ZI_DATA:-/data}
+export ZI_BIN=${ZI_BIN:-${XDG_DATA_HOME:-${HOME}/.local/share}/zi/bin}

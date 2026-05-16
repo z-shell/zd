@@ -6,6 +6,7 @@
 
 @setup {
   load setup
+  load helpers
   setup
 }
 
@@ -15,37 +16,34 @@
 }
 
 @test 'zi OMZL::spectrum.zsh installation' {
-  run ./docker/run.sh --wrap --debug --zunit \
-    zi snippet OMZL::spectrum.zsh
+  zi_test 'zi snippet OMZL::spectrum.zsh'
 
   assert $state equals 0
   assert "$output" contains "Downloading"
 
-  local artifact="${SNIPPETS_DIR}/OMZL::spectrum.zsh/OMZL::spectrum.zsh"
+  local artifact="${ZI_DATA}/snippets/OMZL::spectrum.zsh/OMZL::spectrum.zsh"
   assert "$artifact" is_file
   assert "$artifact" is_readable
 }
 
 @test 'zi OMZP::git installation' {
-  run ./docker/run.sh --wrap --debug --zunit \
-    zi snippet OMZP::git
+  zi_test 'zi snippet OMZP::git'
 
   assert $state equals 0
   assert "$output" contains "Downloading"
 
-  local artifact="${SNIPPETS_DIR}/OMZP::git/OMZP::git"
+  local artifact="${ZI_DATA}/snippets/OMZP::git/OMZP::git"
   assert "$artifact" is_file
   assert "$artifact" is_readable
 }
 
 @test 'zi PZTM::environment installation' {
-  run ./docker/run.sh --wrap --debug --zunit \
-    zi snippet PZTM::environment
+  zi_test 'zi snippet PZTM::environment'
 
   assert $state equals 0
   assert "$output" contains "Downloading"
 
-  local artifact="${SNIPPETS_DIR}/PZTM::environment/PZTM::environment"
+  local artifact="${ZI_DATA}/snippets/PZTM::environment/PZTM::environment"
   assert "$artifact" is_file
   assert "$artifact" is_readable
 }

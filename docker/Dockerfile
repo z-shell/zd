@@ -1,73 +1,109 @@
-ARG VERSION=edge
-FROM alpine:$VERSION
+FROM debian:trixie-slim AS base
+
 LABEL maintainer="Z-Shell Community"
 LABEL email="team@zshell.dev"
 
-ARG DIR
-ARG PUID
-ARG PGID
-ARG TERM
-ARG ZUSER
-ARG ZHOST
-# Bump this ARG when a new Go release is available
-ARG GO_VERSION=1.26.1
+ARG TERM=xterm
+ENV TERM=${TERM}
+ENV DEBIAN_FRONTEND=noninteractive
 
-ENV DIR=${DIR:-/static}
-ENV PUID=${PUID:-1000}
-ENV PGID=${PGID:-1000}
-ENV TERM=${TERM:-xterm}
-ENV ZUSER=${ZUSER:-user}
-ENV HOST=$ZHOST
-ENV PATH="/usr/local/go/bin:$PATH"
-
-RUN set -ex && apk --no-cache add \
-  alpine-zsh-config \
-  ncurses-dev \
-  build-base \
-  coreutils \
-  pcre-dev \
-  zlib-dev \
-  autoconf \
-  libuser \
-  rsync \
-  bash \
-  curl \
-  sudo \
-  zsh \
-  git \
-  vim \
-  jq
-
-# Install Go from upstream — avoids the outdated apk package
 RUN set -ex \
-  && ARCH="$(uname -m)" \
-  && case "$ARCH" in \
-       x86_64)        GOARCH="amd64" ;; \
-       aarch64)       GOARCH="arm64" ;; \
-       armv6l|armv7l) GOARCH="armv6l" ;; \
-       *)             echo "Unsupported arch: $ARCH" && exit 1 ;; \
-     esac \
-  && GO_TARBALL="go${GO_VERSION}.linux-${GOARCH}.tar.gz" \
-  && rm -rf /usr/local/go \
-  && curl -fsSL "https://go.dev/dl/${GO_TARBALL}" -o "/tmp/${GO_TARBALL}" \
-  && EXPECTED_SHA256="$(curl -fsSL 'https://go.dev/dl/?mode=json&include=all' \
-       | jq -r --arg f "${GO_TARBALL}" '.[].files[] | select(.filename==$f) | .sha256')" \
-  && [ -n "${EXPECTED_SHA256}" ] || { echo "Failed to retrieve SHA256 for ${GO_TARBALL}" && exit 1; } \
-  && echo "${EXPECTED_SHA256}  /tmp/${GO_TARBALL}" | sha256sum -c - \
-  && tar -C /usr/local -xzf "/tmp/${GO_TARBALL}" \
-  && rm -f "/tmp/${GO_TARBALL}" \
-  && go version
+  && apt-get update \
+  && apt-get install -y --no-install-recommends \
+       ca-certificates \
+       libncurses-dev \
+       build-essential \
+       coreutils \
+       libpcre2-dev \
+       zlib1g-dev \
+       autoconf \
+       automake \
+       rsync \
+       bash \
+       curl \
+       sudo \
+       golang-go \
+       git \
+       vim \
+       jq \
+  && rm -rf /var/lib/apt/lists/*
 
-WORKDIR $DIR
-COPY . .
-RUN chmod +x entrypoint.sh && ./entrypoint.sh
+# When ZSH_VERSION is set, compile that exact release from the GitHub mirror.
+# Tags are formatted as zsh-X.Y.Z (e.g. zsh-5.9).
+# Otherwise install the distro-packaged zsh (Debian trixie ships 5.9).
+ARG ZSH_VERSION
+# hadolint ignore=DL3003
+RUN set -ex \
+  && if [ -n "${ZSH_VERSION}" ]; then \
+       git clone --depth 1 --branch "zsh-${ZSH_VERSION}" \
+         https://github.com/zsh-users/zsh.git /tmp/zsh-src \
+       && cd /tmp/zsh-src \
+       && [ -f configure ] || autoreconf --install --force \
+       && sed -i -E 's/\b(bool|num|str)(codes|names|fnames)\b/zsh_\1\2/g' Src/Modules/termcap.c \
+       && ./configure --prefix=/usr/local --enable-pcre \
+       && make -j"$(nproc)" \
+       && make install.bin install.fns install.modules \
+       && rm -rf /tmp/zsh-src ; \
+     else \
+       apt-get update \
+       && apt-get install -y --no-install-recommends zsh \
+       && rm -rf /var/lib/apt/lists/* ; \
+     fi
 
-VOLUME ["/src", "/data"]
-COPY --chown=$ZUSER . /src
+# Install zunit and its helpers into /usr/local/bin at build time.
+RUN git clone --depth 1 --branch v0.8.2 https://github.com/zdharma/zunit.git /tmp/zunit.git
+WORKDIR /tmp/zunit.git
+RUN set -ex \
+  && ./build.zsh \
+  && mv /tmp/zunit.git/zunit /usr/local/bin/zunit \
+  && curl -fsSL 'https://raw.githubusercontent.com/z-shell/src/9335c8c14e0aaa845277f882969c146755e1241e/lib/zsh/snippets/revolver' \
+       > /usr/local/bin/revolver \
+  && curl -fsSL 'https://raw.githubusercontent.com/z-shell/src/9335c8c14e0aaa845277f882969c146755e1241e/lib/zsh/snippets/color.zsh' \
+       > /usr/local/bin/color \
+  && chmod a+x /usr/local/bin/color /usr/local/bin/revolver /usr/local/bin/zunit \
+  && rm -rf /tmp/zunit.git
 
-USER $ZUSER
-WORKDIR /home/$ZUSER
+WORKDIR /
 
-RUN /tmp/install.sh -i skip
+FROM base AS test
+
+ARG ZUSER=user
+ARG PUID=1000
+ARG PGID=1000
+ARG ZHOST=zi-docker
+
+ENV PUID=${PUID}
+ENV PGID=${PGID}
+ENV ZUSER=${ZUSER}
+ENV HOST=${ZHOST}
+
+COPY docker/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh && /entrypoint.sh
+
+# Install zi as $ZUSER at build time — no network calls at test time.
+USER ${ZUSER}
+ARG ZI_BRANCH=main
+RUN git clone --depth 1 --branch "${ZI_BRANCH}" \
+  https://github.com/z-shell/zi.git \
+  "${XDG_DATA_HOME:-${HOME}/.local/share}/zi/bin" \
+  && mkdir -p \
+  "${XDG_DATA_HOME:-${HOME}/.local/share}/zi/cache" \
+  "${XDG_DATA_HOME:-${HOME}/.local/share}/zi/completions" \
+  "${XDG_DATA_HOME:-${HOME}/.local/share}/zi/plugins" \
+  "${XDG_DATA_HOME:-${HOME}/.local/share}/zi/snippets"
+
+# Switch back to root for COPY operations.
+USER root
+COPY docker/zshenv /home/${ZUSER}/.zshenv
+COPY docker/zshrc  /home/${ZUSER}/.zshrc
+COPY docker/utils.zsh /src/utils.zsh
+COPY tests/        /src/tests/
+RUN chown -R ${PUID}:${PGID} /home/${ZUSER}/.zshenv /home/${ZUSER}/.zshrc /src
+
+# VOLUME declared after all COPYs — declaring before COPY silently discards copied files.
+VOLUME ["/data"]
+
+USER ${ZUSER}
+WORKDIR /home/${ZUSER}
 
 CMD ["zsh", "-il"]

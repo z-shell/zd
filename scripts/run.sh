@@ -2,9 +2,9 @@
 # -*- mode: bash; sh-indentation: 2; indent-tabs-mode: nil; sh-basic-offset: 2; -*-
 # vim: ft=bash sw=2 ts=2 et
 
-col_error="[31m"
-col_info="[32m"
-col_rst="[0m"
+col_error="[31m"
+col_info="[32m"
+col_rst="[0m"
 
 say() {
   printf '%s\n' "${col_info}${1}${col_rst}" >&2
@@ -38,7 +38,6 @@ running_interactively() {
   fi
 
   if ! [[ -t 1 ]]; then
-    # return false if running non-interactively, unless run with zunit
     parent_process | grep -q zunit || true
   fi
 }
@@ -76,7 +75,6 @@ run() {
     fi
   fi
 
-  # Inherit TERM
   if [[ -n ${TERM} ]]; then
     args+=(--env "TERM=${TERM}")
   fi
@@ -119,12 +117,12 @@ if [[ ${BASH_SOURCE[0]} == "${0}" ]]; then
   CONTAINER_VOLUMES=()
   DEBUG="${DEBUG-}"
   ZSH_DEBUG="${ZSH_DEBUG-}"
+  DEVEL="${DEVEL-}"
   INIT_CONFIG_VAL="${INIT_CONFIG_VAL-}"
   WRAP_CMD="${WRAP_CMD-}"
 
   while [[ -n $* ]]; do
     case "$1" in
-    # Fetch init config from clipboard (Linux only)
     --xsel | -b)
       INIT_CONFIG_VAL="$(xsel -b)"
       shift
@@ -165,17 +163,10 @@ if [[ ${BASH_SOURCE[0]} == "${0}" ]]; then
       CONTAINER_VOLUMES+=("$2")
       shift 2
       ;;
-    # Whether to wrap the command in zsh -silc
     -w | --wrap)
       WRAP_CMD=1
       shift
       ;;
-    --tests | --zunit | -z)
-      ZUNIT=1
-      shift
-      ;;
-    # Whether to enable debug tracing of zd (zsh -x)
-    # Only applies to wrapped commands (--w|--wrap)
     --zsh-debug | -x | -Z)
       ZSH_DEBUG=1
       shift
@@ -190,32 +181,14 @@ if [[ ${BASH_SOURCE[0]} == "${0}" ]]; then
     trap 'rm -vf $INIT_CONFIG' EXIT INT
   fi
   CONTAINER_ROOT="$(
-    cd -P -- "$(dirname "$0")"
+    cd -P -- "$(dirname "$0")/.."
     pwd -P
   )" || exit 9
   if [[ -n ${DEVEL} ]]; then
-    # Mount root of the repo to /src
     CONTAINER_VOLUMES+=(
       "${CONTAINER_ROOT}:/src"
     )
   fi
 
-  if [[ -n ${ZUNIT} ]]; then
-    ROOT_DIR="$(
-      cd -P -- "$(dirname "$0")"
-      pwd -P
-    )" || exit 9
-    # Mount root of the repo to /src
-    # Mount /tmp/zunit to /data
-    CONTAINER_VOLUMES+=(
-      "${CONTAINER_ROOT}:/src"
-      "${TMPDIR:-/tmp}/zunit:/data"
-      "${ROOT_DIR}/zshenv:/home/zunit/.zshenv"
-      "${ROOT_DIR}/zshrc:/home/zunit/.zshrc"
-    )
-    CONTAINER_ENV+=(
-      "QUIET=1"
-    )
-  fi
   run "${INIT_CONFIG}" "$@"
 fi

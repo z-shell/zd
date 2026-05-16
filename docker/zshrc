@@ -1,13 +1,22 @@
 # -*- mode: zsh; sh-indentation: 2; indent-tabs-mode: nil; sh-basic-offset: 2; -*-
 # vim: ft=zsh sw=2 ts=2 et
 
-# Prepare and initiate the source tree.
-source /src/utils.zsh
-prepare_system; initiate_system
+# Initialize Zi with full environment setup.
+typeset -gxU path module_path
+typeset -gA ZI
 
-# If the ZI_ZSH_VERSION is set will install the specified version of Zsh with Zi.
-if [[ -n "$ZI_ZSH_VERSION" ]]; then
-  if [[ "$ZI_ZSH_VERSION" != "$ZSH_VERSION" ]]; then
-    zi::pack-zsh "$ZI_ZSH_VERSION"
-  fi
-fi
+# Set up paths for polaris binaries and zmodules.
+path=("${ZPFX:-${ZI_DATA:-/data}/polaris}/bin" $path)
+module_path+=( /data/zmodules/zpmod/Src )
+
+# Load zpmod if available.
+zmodload zi/zpmod &>/dev/null
+
+# Source zi (pre-installed during docker build).
+ZI[HOME_DIR]="${ZI_DATA:-/data}"
+source "${ZI_BIN}/zi.zsh"
+autoload -Uz _zi
+(( ${+_comps} )) && _comps[zi]=_zi
+
+# Load interactive convenience wrappers.
+[[ -f /src/utils.zsh ]] && source /src/utils.zsh

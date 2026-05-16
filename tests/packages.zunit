@@ -6,6 +6,7 @@
 
 @setup {
   load setup
+  load helpers
   setup
 }
 
@@ -15,13 +16,12 @@
 }
 
 @test 'zi package ls_colors' {
-  run ./docker/run.sh --wrap --debug --zunit \
-    zi pack for ls_colors
+  zi_test 'zi pack for ls_colors'
 
   assert $state equals 0
   assert "$output" contains "Package"
 
-  local artifact="${PLUGINS_DIR}/ls_colors/LS_COLORS"
+  local artifact="${ZI_DATA}/plugins/ls_colors/LS_COLORS"
   assert "$artifact" is_file
   assert "$artifact" is_readable
 }

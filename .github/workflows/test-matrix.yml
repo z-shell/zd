@@ -1,0 +1,43 @@
+name: "ZUnit (Zsh matrix)"
+
+on:
+  schedule:
+    - cron: "0 3 * * 3"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  zunit-matrix:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        zsh_version: ["5.5.1", "5.6.2", "5.7.1", "5.8", "5.8.1", "5.9"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: "Build image for Zsh ${{ matrix.zsh_version }}"
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: docker/Dockerfile
+          load: true
+          build-args: ZSH_VERSION=${{ matrix.zsh_version }}
+          tags: zd:${{ matrix.zsh_version }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: "Run all tests in Zsh ${{ matrix.zsh_version }} container"
+        run: |
+          mkdir -p "${RUNNER_TEMP}/zunit"
+          docker run --rm \
+            --env TERM=xterm \
+            --env ZI_DATA=/data \
+            --volume "${RUNNER_TEMP}/zunit:/data" \
+            "zd:${{ matrix.zsh_version }}" \
+            zsh -c 'cd /src/tests && for f in *.zunit; do zunit --tap --verbose "$f" || exit $?; done'

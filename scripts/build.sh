@@ -2,9 +2,9 @@
 # -*- mode: bash; sh-indentation: 2; indent-tabs-mode: nil; sh-basic-offset: 2; -*-
 # vim: ft=bash sw=2 ts=2 et
 
-col_error="[31m"
-col_info="[32m"
-col_rst="[0m"
+col_error="[31m"
+col_info="[32m"
+col_rst="[0m"
 
 say() {
   printf '%s\n' "${col_info}${1}${col_rst}" >&2
@@ -24,7 +24,7 @@ build() {
   local container_hostname="z-shell"
   shift 3
 
-  local dockerfile="Dockerfile"
+  local dockerfile="../docker/Dockerfile"
 
   if [[ -n ${zsh_version} ]]; then
     tag="zsh${zsh_version}-${tag}"
@@ -33,7 +33,8 @@ build() {
   say "Building image: ${image_name}"
 
   local -a args
-  [[ -n ${NO_CACHE} ]] && args+=(--no-cache "$@")
+  [[ -n ${NO_CACHE} ]] && args+=(--no-cache)
+  args+=("$@")
 
   if docker build \
     --build-arg "ZUSER=${USER:-$(id -u -n)}" \
@@ -41,10 +42,10 @@ build() {
     --build-arg "PUID=${UID:-$(id -u)}" \
     --build-arg "PGID=${GID:-$(id -g)}" \
     --build-arg "TERM=${TERM:-xterm-256color}" \
-    --build-arg "ZI_ZSH_VERSION=${zsh_version}" \
+    --build-arg "ZSH_VERSION=${zsh_version}" \
     --file "${dockerfile}" \
     --tag "${image_name}:${tag}" \
-    "${args[@]}" "$(realpath ../docker || realpath .. || true)"; then
+    "${args[@]}" "$(realpath .. || true)"; then
     {
       say "To use this image for ZUnit tests run: "
       say "export CONTAINER_IMAGE=\"${image_name}\" CONTAINER_TAG=\"${tag}\""

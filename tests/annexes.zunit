@@ -6,6 +6,7 @@
 
 @setup {
   load setup
+  load helpers
   setup
 }
 
@@ -15,106 +16,97 @@
 }
 
 @test 'z-a-bin-gem-node installation' {
-  run ./docker/run.sh --wrap --debug --zunit \
-    zi light z-shell/z-a-bin-gem-node
+  zi_test 'zi light z-shell/z-a-bin-gem-node'
 
   assert $state equals 0
   assert "$output" contains "Downloading"
   assert "$output" contains "Compiling"
 
-  local artifact="${PLUGINS_DIR}/z-shell---z-a-bin-gem-node/z-a-bin-gem-node.plugin.zsh"
+  local artifact="${ZI_DATA}/plugins/z-shell---z-a-bin-gem-node/z-a-bin-gem-node.plugin.zsh"
   assert "$artifact" is_file
   assert "$artifact" is_readable
 }
 
 @test 'z-a-meta-plugins installation' {
-  run ./docker/run.sh --wrap --debug --zunit \
-    zi light z-shell/z-a-meta-plugins
+  zi_test 'zi light z-shell/z-a-meta-plugins'
 
   assert $state equals 0
   assert "$output" contains "Downloading"
   assert "$output" contains "Compiling"
 
-  local artifact="${PLUGINS_DIR}/z-shell---z-a-meta-plugins/z-a-meta-plugins.plugin.zsh"
+  local artifact="${ZI_DATA}/plugins/z-shell---z-a-meta-plugins/z-a-meta-plugins.plugin.zsh"
   assert "$artifact" is_file
   assert "$artifact" is_readable
 }
 
-
 @test 'z-a-readurl installation' {
-  run ./docker/run.sh --wrap --debug --zunit \
-    zi light z-shell/z-a-readurl
+  zi_test 'zi light z-shell/z-a-readurl'
 
   assert $state equals 0
   assert "$output" contains "Downloading"
   assert "$output" contains "Compiling"
 
-  local artifact="${PLUGINS_DIR}/z-shell---z-a-readurl/z-a-readurl.plugin.zsh"
+  local artifact="${ZI_DATA}/plugins/z-shell---z-a-readurl/z-a-readurl.plugin.zsh"
   assert "$artifact" is_file
   assert "$artifact" is_readable
 }
 
 @test 'z-a-rust installation' {
-  run ./docker/run.sh --wrap --debug --zunit \
-    zi light z-shell/z-a-rust
+  zi_test 'zi light z-shell/z-a-rust'
 
   assert $state equals 0
   assert "$output" contains "Downloading"
   assert "$output" contains "Compiling"
 
-  local artifact="${PLUGINS_DIR}/z-shell---z-a-rust/z-a-rust.plugin.zsh"
+  local artifact="${ZI_DATA}/plugins/z-shell---z-a-rust/z-a-rust.plugin.zsh"
   assert "$artifact" is_file
   assert "$artifact" is_readable
 }
 
 @test 'z-a-eval installation' {
-  run ./docker/run.sh --wrap --debug --zunit \
-    zi light z-shell/z-a-eval
+  zi_test 'zi light z-shell/z-a-eval'
 
   assert $state equals 1
   assert "$output" contains "Downloading"
   assert "$output" contains "Compiling"
 
-  local artifact="${PLUGINS_DIR}/z-shell---z-a-eval/z-a-eval.plugin.zsh"
+  local artifact="${ZI_DATA}/plugins/z-shell---z-a-eval/z-a-eval.plugin.zsh"
   assert "$artifact" is_file
   assert "$artifact" is_readable
 }
 
 @test 'z-a-linkbin installation' {
-  run ./docker/run.sh --wrap --debug --zunit \
-    zi light z-shell/z-a-linkbin
+  zi_test 'zi light z-shell/z-a-linkbin'
 
   assert $state equals 0
   assert "$output" contains "Downloading"
   assert "$output" contains "Compiling"
 
-  local artifact="${PLUGINS_DIR}/z-shell---z-a-linkbin/z-a-linkbin.plugin.zsh"
+  local artifact="${ZI_DATA}/plugins/z-shell---z-a-linkbin/z-a-linkbin.plugin.zsh"
   assert "$artifact" is_file
   assert "$artifact" is_readable
 }
 
 @test 'z-a-default-ice installation' {
-  run ./docker/run.sh --wrap --debug --zunit \
-    zi light z-shell/z-a-default-ice
+  zi_test 'zi light z-shell/z-a-default-ice'
 
   assert $state equals 1
   assert "$output" contains "Downloading"
   assert "$output" contains "Compiling"
 
-  local artifact="${PLUGINS_DIR}/z-shell---z-a-default-ice/z-a-default-ice.plugin.zsh"
+  local artifact="${ZI_DATA}/plugins/z-shell---z-a-default-ice/z-a-default-ice.plugin.zsh"
   assert "$artifact" is_file
   assert "$artifact" is_readable
 }
 
 @test 'z-a-test installation' {
-  run ./docker/run.sh --wrap --debug --zunit \
-    zi light z-shell/z-a-test
+  zi_test 'zi light z-shell/z-a-test'
 
   assert $state equals 0
   assert "$output" contains "Downloading"
   assert "$output" contains "Compiling"
 
-  local artifact="${PLUGINS_DIR}/z-shell---z-a-test/z-a-test.plugin.zsh"
+  local artifact="${ZI_DATA}/plugins/z-shell---z-a-test/z-a-test.plugin.zsh"
   assert "$artifact" is_file
   assert "$artifact" is_readable
 }

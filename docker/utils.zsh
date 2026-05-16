@@ -13,12 +13,12 @@ prepare_system() {
 initiate_system() {
   typeset -gxU path module_path
 
-  path=("${ZPFX:-${HOME}/.zi/polaris}/bin" "${HOME}/go/bin" "/usr/local/go/bin" $path)
+  path=("${ZPFX:-${ZI_DATA:-/data}/polaris}/bin" "${HOME}/go/bin" "/usr/local/go/bin" $path)
   module_path+=( /data/zmodules/zpmod/Src )
 
   zmodload zi/zpmod &>/dev/null
 
-  source ~/.zi/bin/zi.zsh
+  source "${ZI_BIN}/zi.zsh"
 
   autoload -Uz _zi
   (( ${+_comps} )) && _comps[zi]=_zi
@@ -26,10 +26,10 @@ initiate_system() {
 
 reload_system() {
   local zf1 zf2
-  for zf1 in ~/.zi/bin/*.zsh; do
+  for zf1 in "${ZI_BIN}"/*.zsh; do
     source "$zf1"
   done
-  for zf2 in ~/.zi/bin/lib/zsh/*.zsh; do
+  for zf2 in "${ZI_BIN}"/lib/zsh/*.zsh; do
     source "$zf2"
   done
 }
@@ -57,7 +57,7 @@ zi::setup-annexes+rec() {
 }
 
 zi::setup-annexes+add() {
-  sudo apk add ruby-dev grep tree
+  sudo apt-get install -y ruby-dev grep tree
   zi::install-zsdoc
   zi light-mode for z-shell/z-a-test
 }

@@ -1,25 +1,14 @@
 #!/usr/bin/env sh
 
 HOME="/home/${ZUSER}"
-
 export HOME
 
-command sed -i -r 's#^(root:.+):/bin/ash#\1:/bin/zsh#' /etc/passwd
-command adduser -D -s /bin/zsh -u "${PUID}" -h "${HOME}" "${ZUSER}"
+# Change root's default shell from bash to zsh.
+command sed -i -r 's#^(root:.+):/bin/bash#\1:/bin/zsh#' /etc/passwd
 
-command printf '%s' "${ZUSER} ALL=(ALL) NOPASSWD: ALL" >/etc/sudoers.d/user
+# Create the unprivileged user with a home directory and zsh as login shell.
+command useradd -m -s /bin/zsh -u "${PUID}" "${ZUSER}"
+
+command printf '%s\n' "${ZUSER} ALL=(ALL) NOPASSWD: ALL" >/etc/sudoers.d/user
 command mkdir -p /src /data
 command chown -R "${PUID}:${PGID}" /src /data
-
-command wget 'https://raw.githubusercontent.com/z-shell/zi-src/main/lib/sh/install.sh' -qO /tmp/install.sh
-command chown "${PUID}:${PGID}" /tmp/install.sh
-command chmod u+x /tmp/install.sh
-
-command ln -sfv /src/zshenv "${HOME}/.zshenv"
-command ln -sfv /src/zshrc "${HOME}/.zshrc"
-
-if [ -f "${HOME}"/init.zsh ]; then
-  command chmod u+x "${HOME}"/init.zsh
-  # shellcheck source=/dev/null
-  . "${HOME}"/init.zsh
-fi

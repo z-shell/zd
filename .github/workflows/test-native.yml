@@ -1,0 +1,79 @@
+name: "ZUnit (native)"
+
+permissions:
+  contents: read
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "tests/**"
+      - "utils.zsh"
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: "0 12 * * 1"
+  workflow_dispatch:
+    inputs:
+      zi_repo:
+        description: "GitHub repo for zi (owner/name). Leave empty to use the default install script."
+        required: false
+        default: ""
+      zi_ref:
+        description: "Branch, tag, or SHA of zi to test."
+        required: false
+        default: "main"
+  workflow_call:
+    inputs:
+      zi_repo:
+        description: "GitHub repo for zi (owner/name). Leave empty to use the default install script."
+        type: string
+        required: false
+        default: ""
+      zi_ref:
+        description: "Branch, tag, or SHA of zi to test."
+        type: string
+        required: false
+        default: "main"
+
+jobs:
+  zunit:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        file: [annexes, ice, packages, plugins, snippets]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install zsh
+        run: sudo apt-get update && sudo apt-get install -yq zsh
+
+      - name: Install zunit
+        run: |
+          mkdir -p bin
+          curl -fsSL 'https://raw.githubusercontent.com/zdharma/revolver/v0.2.4/revolver' > bin/revolver
+          curl -fsSL 'https://raw.githubusercontent.com/zdharma/color/d8f91ab5fcfceb623ae45d3333ad0e543775549c/color.zsh' > bin/color
+          git clone --depth 1 --branch v0.8.2 https://github.com/zdharma/zunit.git zunit.git
+          cd zunit.git && ./build.zsh && cd ..
+          mv zunit.git/zunit bin/
+          chmod u+x bin/{color,revolver,zunit}
+
+      - name: Install zi
+        env:
+          ZI_REPO: ${{ inputs.zi_repo || 'z-shell/zi' }}
+          ZI_REF: ${{ inputs.zi_ref || 'main' }}
+        run: |
+          zi_home="${XDG_DATA_HOME:-${HOME}/.local/share}/zi"
+          git clone --depth 1 --branch "${ZI_REF}" \
+            "https://github.com/${ZI_REPO}.git" "${zi_home}/bin"
+          mkdir -p "${zi_home}"/{cache,completions,plugins,snippets}
+          [[ -f "${zi_home}/bin/zi.zsh" ]] || { echo "zi.zsh not found after install"; exit 1; }
+
+      - name: "ZUnit: ${{ matrix.file }}"
+        run: |
+          export PATH="$PWD/bin:$PATH"
+          export TERM=xterm
+          export ZI_BIN="${XDG_DATA_HOME:-${HOME}/.local/share}/zi/bin"
+          export ZI_DATA="${RUNNER_TEMP}/zunit"
+          zunit --tap --verbose "tests/${{ matrix.file }}.zunit"
