@@ -40,4 +40,4 @@ jobs:
             --env ZI_DATA=/data \
             --volume "${RUNNER_TEMP}/zunit:/data" \
             "zd:${{ matrix.zsh_version }}" \
-            zsh -c 'for f in /src/tests/*.zunit; do zunit --tap --verbose "$f" || exit $?; done'
+            zsh -c 'cd /src/tests && for f in *.zunit; do zunit --tap --verbose "$f" || exit $?; done'
