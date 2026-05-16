@@ -61,17 +61,14 @@ jobs:
 
       - name: Install zi
         env:
-          ZI_REPO: ${{ inputs.zi_repo }}
-          ZI_REF: ${{ inputs.zi_ref }}
+          ZI_REPO: ${{ inputs.zi_repo || 'z-shell/zi' }}
+          ZI_REF: ${{ inputs.zi_ref || 'main' }}
         run: |
-          if [[ -n "$ZI_REPO" ]]; then
-            zi_home="${XDG_DATA_HOME:-${HOME}/.local/share}/zi"
-            git clone --depth 1 --branch "${ZI_REF:-main}" \
-              "https://github.com/${ZI_REPO}.git" "${zi_home}/bin"
-            mkdir -p "${zi_home}"/{cache,completions,plugins,snippets}
-          else
-            zsh -c "$(curl -fsSL https://install.zshell.dev)" -- -i skip
-          fi
+          zi_home="${XDG_DATA_HOME:-${HOME}/.local/share}/zi"
+          git clone --depth 1 --branch "${ZI_REF}" \
+            "https://github.com/${ZI_REPO}.git" "${zi_home}/bin"
+          mkdir -p "${zi_home}"/{cache,completions,plugins,snippets}
+          [[ -f "${zi_home}/bin/zi.zsh" ]] || { echo "zi.zsh not found after install"; exit 1; }
 
       - name: "ZUnit: ${{ matrix.file }}"
         run: |

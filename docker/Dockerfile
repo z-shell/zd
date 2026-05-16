@@ -57,13 +57,14 @@ RUN chmod +x /entrypoint.sh && /entrypoint.sh
 # Install zi as $ZUSER at build time — no network calls at test time.
 USER ${ZUSER}
 ARG ZI_BRANCH=main
-RUN zsh -c "$(curl -fsSL https://install.zshell.dev)" -- -i skip
-
-# Optionally install a specific Zsh version via zi pack at build time.
-# Leave ZSH_VERSION empty for the :latest image (uses Alpine's zsh).
-ARG ZSH_VERSION=
-RUN [ -z "${ZSH_VERSION}" ] || \
-  zsh -c "source \${XDG_DATA_HOME:-\${HOME}/.local/share}/zi/bin/zi.zsh && zi pack\"${ZSH_VERSION}\" for zsh"
+RUN git clone --depth 1 --branch "${ZI_BRANCH}" \
+  https://github.com/z-shell/zi.git \
+  "${XDG_DATA_HOME:-${HOME}/.local/share}/zi/bin" \
+  && mkdir -p \
+  "${XDG_DATA_HOME:-${HOME}/.local/share}/zi/cache" \
+  "${XDG_DATA_HOME:-${HOME}/.local/share}/zi/completions" \
+  "${XDG_DATA_HOME:-${HOME}/.local/share}/zi/plugins" \
+  "${XDG_DATA_HOME:-${HOME}/.local/share}/zi/snippets"
 
 # Switch back to root for COPY operations.
 USER root
