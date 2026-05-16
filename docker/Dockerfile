@@ -41,7 +41,7 @@ RUN set -ex \
        && sed -i -E 's/\b(bool|num|str)(codes|names|fnames)\b/zsh_\1\2/g' Src/Modules/termcap.c \
        && ./configure --prefix=/usr/local --enable-pcre \
        && make -j"$(nproc)" \
-       && make install \
+       && make install.bin install.fns install.modules \
        && rm -rf /tmp/zsh-src ; \
      else \
        apt-get update \
