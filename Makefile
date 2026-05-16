@@ -64,7 +64,8 @@ bin/zunit:
 	  > bin/revolver
 	@curl -fsSL 'https://raw.githubusercontent.com/zdharma/color/d8f91ab5fcfceb623ae45d3333ad0e543775549c/color.zsh' \
 	  > bin/color
-	@git clone --depth 1 https://github.com/zdharma/zunit.git /tmp/zunit.git 2>/dev/null
+	@rm -rf /tmp/zunit.git
+	@git clone --depth 1 https://github.com/zdharma/zunit.git /tmp/zunit.git
 	@cd /tmp/zunit.git && ./build.zsh
 	@mv /tmp/zunit.git/zunit bin/zunit
 	@chmod u+x bin/color bin/revolver bin/zunit
