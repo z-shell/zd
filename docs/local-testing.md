@@ -115,10 +115,10 @@ The container is removed on exit. State does not persist between sessions.
 ## Building the image locally — `make build`
 
 ```sh
-# Build with Alpine's default Zsh (same as :latest)
+# Build with Debian's default Zsh (same as :latest)
 make build
 
-# Build with a specific Zsh version baked in
+# Build with a specific Zsh version compiled from source
 make build ZSH_VERSION=5.9
 make build ZSH_VERSION=5.8.1
 

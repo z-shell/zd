@@ -3,9 +3,12 @@
 HOME="/home/${ZUSER}"
 export HOME
 
-command sed -i -r 's#^(root:.+):/bin/ash#\1:/bin/zsh#' /etc/passwd
-command adduser -D -s /bin/zsh -u "${PUID}" -h "${HOME}" "${ZUSER}"
+# Change root's default shell from bash to zsh.
+command sed -i -r 's#^(root:.+):/bin/bash#\1:/bin/zsh#' /etc/passwd
 
-command printf '%s' "${ZUSER} ALL=(ALL) NOPASSWD: ALL" >/etc/sudoers.d/user
+# Create the unprivileged user with a home directory and zsh as login shell.
+command useradd -m -s /bin/zsh -u "${PUID}" "${ZUSER}"
+
+command printf '%s\n' "${ZUSER} ALL=(ALL) NOPASSWD: ALL" >/etc/sudoers.d/user
 command mkdir -p /src /data
 command chown -R "${PUID}:${PGID}" /src /data

@@ -63,7 +63,7 @@ Runs weekly (Wednesday 03:00 UTC) and on manual dispatch. Not triggered by push 
 
 **Per job:**
 
-1. Build the Docker image for that Zsh version using `docker/setup-buildx-action` and `docker/build-push-action`, passing `ZSH_VERSION` as a build arg
+1. Build the Docker image for that Zsh version using `docker/setup-buildx-action` and `docker/build-push-action`, passing `ZSH_VERSION` as a build arg — the Dockerfile compiles that exact Zsh release from source on the `debian:trixie-slim` base
 2. Layer caching via `type=gha` — only changed layers rebuild on subsequent runs
 3. Run all test files in a single container invocation:
 

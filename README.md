@@ -2,6 +2,8 @@
 
 `zd` is the official test harness for the [Zi](https://github.com/z-shell/zi) plugin manager. It provides a ZUnit test suite that verifies Zi commands work correctly — plugin installation, snippet loading, ice modifiers, annexes, and packages. The suite runs natively on CI for every pull request and inside Docker containers for Zsh version compatibility testing. It also works as a reusable workflow so other repos in the Z-Shell ecosystem can test against a specific Zi commit.
 
+The image is based on **Debian trixie-slim** (`debian:trixie-slim`), providing full glibc compatibility and the breadth of the `apt` ecosystem — making it straightforward to add test dependencies or use the container as an interactive development environment.
+
 ## Architecture
 
 ```text

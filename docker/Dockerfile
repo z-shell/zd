@@ -1,28 +1,52 @@
-ARG ALPINE_VERSION=edge
-FROM alpine:${ALPINE_VERSION} AS base
+FROM debian:trixie-slim AS base
 
 LABEL maintainer="Z-Shell Community"
 LABEL email="team@zshell.dev"
 
 ARG TERM=xterm
 ENV TERM=${TERM}
+ENV DEBIAN_FRONTEND=noninteractive
 
-RUN set -ex && apk --no-cache add \
-  ncurses-dev \
-  build-base \
-  coreutils \
-  pcre-dev \
-  zlib-dev \
-  autoconf \
-  rsync \
-  bash \
-  curl \
-  sudo \
-  go \
-  zsh \
-  git \
-  vim \
-  jq
+RUN set -ex \
+  && apt-get update \
+  && apt-get install -y --no-install-recommends \
+       ca-certificates \
+       libncurses-dev \
+       build-essential \
+       coreutils \
+       libpcre2-dev \
+       zlib1g-dev \
+       autoconf \
+       rsync \
+       bash \
+       curl \
+       sudo \
+       golang-go \
+       git \
+       vim \
+       jq \
+  && rm -rf /var/lib/apt/lists/*
+
+# When ZSH_VERSION is set, compile that exact release from source.
+# Otherwise install the distro-packaged zsh (Debian trixie ships 5.9).
+ARG ZSH_VERSION
+RUN set -ex \
+  && if [ -n "${ZSH_VERSION}" ]; then \
+       apt-get update \
+       && apt-get install -y --no-install-recommends wget xz-utils make \
+       && rm -rf /var/lib/apt/lists/* \
+       && wget -q "https://www.zsh.org/pub/zsh-${ZSH_VERSION}.tar.xz" \
+       && tar xf "zsh-${ZSH_VERSION}.tar.xz" \
+       && cd "zsh-${ZSH_VERSION}" \
+       && ./configure --prefix=/usr/local --enable-pcre \
+       && make -j"$(nproc)" \
+       && make install \
+       && cd .. && rm -rf "zsh-${ZSH_VERSION}"* ; \
+     else \
+       apt-get update \
+       && apt-get install -y --no-install-recommends zsh \
+       && rm -rf /var/lib/apt/lists/* ; \
+     fi
 
 # Install zunit and its helpers into /usr/local/bin at build time.
 RUN git clone --depth 1 https://github.com/zdharma/zunit.git /tmp/zunit.git
@@ -36,6 +60,8 @@ RUN set -ex \
        > /usr/local/bin/color \
   && chmod u+x /usr/local/bin/color /usr/local/bin/revolver /usr/local/bin/zunit \
   && rm -rf /tmp/zunit.git
+
+WORKDIR /
 
 FROM base AS test
 

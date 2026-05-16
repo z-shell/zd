@@ -57,7 +57,7 @@ zi::setup-annexes+rec() {
 }
 
 zi::setup-annexes+add() {
-  sudo apk add ruby-dev grep tree
+  sudo apt-get install -y ruby-dev grep tree
   zi::install-zsdoc
   zi light-mode for z-shell/z-a-test
 }
