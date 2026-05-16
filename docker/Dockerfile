@@ -34,9 +34,9 @@ ARG ZSH_VERSION
 RUN set -ex \
   && if [ -n "${ZSH_VERSION}" ]; then \
        apt-get update \
-       && apt-get install -y --no-install-recommends xz-utils make \
+       && apt-get install -y --no-install-recommends wget xz-utils make \
        && rm -rf /var/lib/apt/lists/* \
-       && curl -fsSL "https://www.zsh.org/pub/zsh-${ZSH_VERSION}.tar.xz" -o "zsh-${ZSH_VERSION}.tar.xz" \
+       && wget -q "https://www.zsh.org/pub/zsh-${ZSH_VERSION}.tar.xz" \
        && tar xf "zsh-${ZSH_VERSION}.tar.xz" \
        && cd "zsh-${ZSH_VERSION}" \
        && ./configure --prefix=/usr/local --enable-pcre \
