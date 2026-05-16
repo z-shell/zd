@@ -50,7 +50,7 @@ RUN set -ex \
      fi
 
 # Install zunit and its helpers into /usr/local/bin at build time.
-RUN git clone --depth 1 https://github.com/zdharma/zunit.git /tmp/zunit.git
+RUN git clone --depth 1 --branch v0.8.2 https://github.com/zdharma/zunit.git /tmp/zunit.git
 WORKDIR /tmp/zunit.git
 RUN set -ex \
   && ./build.zsh \
