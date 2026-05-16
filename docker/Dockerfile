@@ -58,7 +58,7 @@ RUN set -ex \
        > /usr/local/bin/revolver \
   && curl -fsSL 'https://raw.githubusercontent.com/zdharma/color/d8f91ab5fcfceb623ae45d3333ad0e543775549c/color.zsh' \
        > /usr/local/bin/color \
-  && chmod u+x /usr/local/bin/color /usr/local/bin/revolver /usr/local/bin/zunit \
+  && chmod a+x /usr/local/bin/color /usr/local/bin/revolver /usr/local/bin/zunit \
   && rm -rf /tmp/zunit.git
 
 WORKDIR /
