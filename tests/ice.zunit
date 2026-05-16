@@ -60,7 +60,7 @@
   '
 
   assert "$output" contains "DOES_NOT_EXIST"
-  assert "$output" contains "mv ice didn'\''t match any file"
+  assert "$output" contains "∞zi-mv-hook hook returned with"
 }
 
 @test 'mv ice' {
