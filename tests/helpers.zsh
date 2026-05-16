@@ -18,8 +18,8 @@ zi_test() {
     typeset -gxU path
     path=( \${HOME}/go/bin \$path )
     typeset -gA ZI
-    ZI[HOME_DIR]=${_zi_data}
-    source ${_zi_bin}/zi.zsh
+    ZI[HOME_DIR]='${_zi_data}'
+    source '${_zi_bin}/zi.zsh'
     autoload -Uz _zi
     ${script}
   "
