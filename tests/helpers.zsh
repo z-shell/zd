@@ -14,7 +14,7 @@ zi_test() {
   local script=$1
   local _zi_bin="${ZI_BIN:-${XDG_DATA_HOME:-${HOME}/.local/share}/zi/bin}"
   local _zi_data="${ZI_DATA:-${TMPDIR:-/tmp}/zunit}"
-  run zsh -c "
+  run env NO_COLOR=1 TERM=dumb zsh -c "
     typeset -gxU path
     path=( \${HOME}/go/bin \$path )
     typeset -gA ZI
