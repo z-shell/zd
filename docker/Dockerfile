@@ -38,7 +38,7 @@ RUN set -ex \
          https://github.com/zsh-users/zsh.git /tmp/zsh-src \
        && cd /tmp/zsh-src \
        && [ -f configure ] || { autoheader && autoconf; } \
-       && sed -i 's/^static char \*bool/static const char *const bool/' Src/Modules/termcap.c \
+       && sed -i -E 's/\b(bool|num|str)(codes|names|fnames)\b/zsh_\1\2/g' Src/Modules/termcap.c \
        && ./configure --prefix=/usr/local --enable-pcre \
        && make -j"$(nproc)" \
        && make install \
