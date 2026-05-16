@@ -104,7 +104,7 @@ $ make shell
 user@zi-docker ~ $ zi light junegunn/fzf
 ...
 user@zi-docker ~ $ which fzf
-/data/polaris/bin/fzf
+/tmp/zd-shell/polaris/bin/fzf
 user@zi-docker ~ $ exit
 ```
 

@@ -1,8 +1,18 @@
 # -*- mode: zsh; sh-indentation: 2; indent-tabs-mode: nil; sh-basic-offset: 2; -*-
 # vim: ft=zsh sw=2 ts=2 et
 
-# Source zi (pre-installed during docker build).
+# Initialize Zi with full environment setup.
+typeset -gxU path module_path
 typeset -gA ZI
+
+# Set up paths for polaris binaries and zmodules.
+path=("${ZPFX:-${ZI_DATA:-/data}/polaris}/bin" $path)
+module_path+=( /data/zmodules/zpmod/Src )
+
+# Load zpmod if available.
+zmodload zi/zpmod &>/dev/null
+
+# Source zi (pre-installed during docker build).
 ZI[HOME_DIR]="${ZI_DATA:-/data}"
 source "${ZI_BIN}/zi.zsh"
 autoload -Uz _zi
