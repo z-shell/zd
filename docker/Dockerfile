@@ -30,12 +30,13 @@ RUN set -ex \
 # When ZSH_VERSION is set, compile that exact release from source.
 # Otherwise install the distro-packaged zsh (Debian trixie ships 5.9).
 ARG ZSH_VERSION
+# hadolint ignore=DL3003
 RUN set -ex \
   && if [ -n "${ZSH_VERSION}" ]; then \
        apt-get update \
-       && apt-get install -y --no-install-recommends wget xz-utils make \
+       && apt-get install -y --no-install-recommends xz-utils make \
        && rm -rf /var/lib/apt/lists/* \
-       && wget -q "https://www.zsh.org/pub/zsh-${ZSH_VERSION}.tar.xz" \
+       && curl -fsSL "https://www.zsh.org/pub/zsh-${ZSH_VERSION}.tar.xz" -o "zsh-${ZSH_VERSION}.tar.xz" \
        && tar xf "zsh-${ZSH_VERSION}.tar.xz" \
        && cd "zsh-${ZSH_VERSION}" \
        && ./configure --prefix=/usr/local --enable-pcre \
