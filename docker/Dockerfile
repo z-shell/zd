@@ -27,22 +27,21 @@ RUN set -ex \
        jq \
   && rm -rf /var/lib/apt/lists/*
 
-# When ZSH_VERSION is set, compile that exact release from source.
+# When ZSH_VERSION is set, compile that exact release from the GitHub mirror.
+# Tags are formatted as zsh-X.Y.Z (e.g. zsh-5.9).
 # Otherwise install the distro-packaged zsh (Debian trixie ships 5.9).
 ARG ZSH_VERSION
 # hadolint ignore=DL3003
 RUN set -ex \
   && if [ -n "${ZSH_VERSION}" ]; then \
-       apt-get update \
-       && apt-get install -y --no-install-recommends wget xz-utils make \
-       && rm -rf /var/lib/apt/lists/* \
-       && wget -q "https://www.zsh.org/pub/zsh-${ZSH_VERSION}.tar.xz" \
-       && tar xf "zsh-${ZSH_VERSION}.tar.xz" \
-       && cd "zsh-${ZSH_VERSION}" \
+       git clone --depth 1 --branch "zsh-${ZSH_VERSION}" \
+         https://github.com/zsh-users/zsh.git /tmp/zsh-src \
+       && cd /tmp/zsh-src \
+       && [ -f configure ] || { autoheader && autoconf; } \
        && ./configure --prefix=/usr/local --enable-pcre \
        && make -j"$(nproc)" \
        && make install \
-       && cd .. && rm -rf "zsh-${ZSH_VERSION}"* ; \
+       && rm -rf /tmp/zsh-src ; \
      else \
        apt-get update \
        && apt-get install -y --no-install-recommends zsh \
