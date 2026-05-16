@@ -17,6 +17,7 @@ RUN set -ex \
        libpcre2-dev \
        zlib1g-dev \
        autoconf \
+       automake \
        rsync \
        bash \
        curl \
@@ -38,6 +39,8 @@ RUN set -ex \
          https://github.com/zsh-users/zsh.git /tmp/zsh-src \
        && cd /tmp/zsh-src \
        && [ -f configure ] || { autoheader && autoconf; } \
+       && cp "$(automake --print-libdir)/config.guess" config.guess \
+       && cp "$(automake --print-libdir)/config.sub" config.sub \
        && sed -i -E 's/\b(bool|num|str)(codes|names|fnames)\b/zsh_\1\2/g' Src/Modules/termcap.c \
        && ./configure --prefix=/usr/local --enable-pcre \
        && make -j"$(nproc)" \
