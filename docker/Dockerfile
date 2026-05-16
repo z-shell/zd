@@ -39,8 +39,6 @@ RUN set -ex \
          https://github.com/zsh-users/zsh.git /tmp/zsh-src \
        && cd /tmp/zsh-src \
        && [ -f configure ] || autoreconf --install --force \
-       && cp "$(automake --print-libdir)/config.guess" config.guess \
-       && cp "$(automake --print-libdir)/config.sub" config.sub \
        && sed -i -E 's/\b(bool|num|str)(codes|names|fnames)\b/zsh_\1\2/g' Src/Modules/termcap.c \
        && ./configure --prefix=/usr/local --enable-pcre \
        && make -j"$(nproc)" \
@@ -58,9 +56,9 @@ WORKDIR /tmp/zunit.git
 RUN set -ex \
   && ./build.zsh \
   && mv /tmp/zunit.git/zunit /usr/local/bin/zunit \
-  && curl -fsSL 'https://raw.githubusercontent.com/zdharma/revolver/v0.2.4/revolver' \
+  && curl -fsSL 'https://raw.githubusercontent.com/z-shell/src/9335c8c14e0aaa845277f882969c146755e1241e/lib/zsh/snippets/revolver' \
        > /usr/local/bin/revolver \
-  && curl -fsSL 'https://raw.githubusercontent.com/zdharma/color/d8f91ab5fcfceb623ae45d3333ad0e543775549c/color.zsh' \
+  && curl -fsSL 'https://raw.githubusercontent.com/z-shell/src/9335c8c14e0aaa845277f882969c146755e1241e/lib/zsh/snippets/color.zsh' \
        > /usr/local/bin/color \
   && chmod a+x /usr/local/bin/color /usr/local/bin/revolver /usr/local/bin/zunit \
   && rm -rf /tmp/zunit.git
