@@ -8,14 +8,12 @@ ARG TERM=xterm
 ENV TERM=${TERM}
 
 RUN set -ex && apk --no-cache add \
-  alpine-zsh-config \
   ncurses-dev \
   build-base \
   coreutils \
   pcre-dev \
   zlib-dev \
   autoconf \
-  libuser \
   rsync \
   bash \
   curl \

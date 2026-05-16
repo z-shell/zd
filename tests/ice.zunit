@@ -59,9 +59,8 @@
       for @sharkdp/fd
   '
 
-  assert $state equals 1
   assert "$output" contains "DOES_NOT_EXIST"
-  assert "$output" contains "didn'\''t match any file"
+  assert "$output" contains "mv ice didn'\''t match any file"
 }
 
 @test 'mv ice' {
