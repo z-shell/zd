@@ -1,6 +1,6 @@
 # Writing Tests
 
-Tests live in `tests/` as `.zunit` files and are run by [ZUnit](https://github.com/zdharma/zunit). Each file covers a logical group of Zi functionality. The same files run in both the native CI tier and the Docker matrix — no duplication.
+Tests live in `tests/` as `.zunit` files and are run by [ZUnit](https://github.com/z-shell/zunit). Each file covers a logical group of Zi functionality. The same files run in both the native CI tier and the Docker matrix — no duplication.
 
 ## Test file anatomy
 
