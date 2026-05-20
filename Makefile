@@ -60,12 +60,12 @@ help:
 bin/zunit:
 	@echo "Installing zunit into bin/ ..."
 	@mkdir -p bin
-	@curl -fsSL 'https://raw.githubusercontent.com/zdharma/revolver/v0.2.4/revolver' \
+	@curl -fsSL 'https://raw.githubusercontent.com/z-shell/revolver/v0.2.4/revolver' \
 	  > bin/revolver
-	@curl -fsSL 'https://raw.githubusercontent.com/zdharma/color/d8f91ab5fcfceb623ae45d3333ad0e543775549c/color.zsh' \
+	@curl -fsSL 'https://raw.githubusercontent.com/z-shell/color/d8f91ab5fcfceb623ae45d3333ad0e543775549c/color.zsh' \
 	  > bin/color
 	@rm -rf /tmp/zunit.git
-	@git clone --depth 1 https://github.com/zdharma/zunit.git /tmp/zunit.git
+	@git clone --depth 1 https://github.com/z-shell/zunit.git /tmp/zunit.git
 	@cd /tmp/zunit.git && ./build.zsh
 	@mv /tmp/zunit.git/zunit bin/zunit
 	@chmod u+x bin/color bin/revolver bin/zunit
