@@ -18,7 +18,7 @@
 
 The primary CI workflow. Runs on every push to `main` (when `tests/**` or `utils.zsh` change), on all pull requests, on a weekly Monday schedule, and on manual or `workflow_call` dispatch.
 
-**Matrix:** one parallel job per `.zunit` file — `annexes`, `ice`, `packages`, `plugins`, `snippets`. Jobs run with `fail-fast: false` so a failure in one suite does not cancel the others.
+**Matrix:** one parallel job per `.zunit` file — `annexes`, `compat`, `ice`, `packages`, `plugins`, `snippets`. Jobs run with `fail-fast: false` so a failure in one suite does not cancel the others.
 
 **Steps per job:**
 
