@@ -27,19 +27,23 @@ on:
 jobs:
   zd:
     name: "ZUnit suite"
+    permissions:
+      contents: read
     uses: z-shell/zd/.github/workflows/test-native.yml@main
     with:
       zi_repo: z-shell/zi # the repo being tested
-      zi_ref: ${{ github.sha }} # the exact commit under test
+      # PRs use the head commit, not GitHub's synthetic merge commit.
+      zi_ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
 ```
 
 **What each field does:**
 
-| Field                                                     | Purpose                                                            |
-| --------------------------------------------------------- | ------------------------------------------------------------------ |
-| `uses: z-shell/zd/.github/workflows/test-native.yml@main` | Calls the reusable workflow at the `main` ref of `zd`              |
-| `zi_repo: z-shell/zi`                                     | Tells `zd` to clone this repo instead of using the default install |
-| `zi_ref: ${{ github.sha }}`                               | Pins to the exact commit that triggered the caller's workflow      |
+| Field                                                                                                      | Purpose                                                                    |
+| ---------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| `permissions: contents: read`                                                                              | Grants only the repository access required by the reusable workflow        |
+| `uses: z-shell/zd/.github/workflows/test-native.yml@main`                                                  | Calls the reusable workflow at the `main` ref of `zd`                      |
+| `zi_repo: z-shell/zi`                                                                                      | Tells `zd` to clone this repo instead of using the default install         |
+| `zi_ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha \|\| github.sha }}` | Pins PRs to their head commit and pushes to the commit that triggered them |
 
 The caller's `GITHUB_TOKEN` is used automatically — no additional secrets are required. Both repositories must be public.
 
@@ -56,11 +60,13 @@ The caller's `GITHUB_TOKEN` is used automatically — no additional secrets are 
 
 ## Choosing `zi_ref`
 
-**`${{ github.sha }}`** — use this in pull request workflows. Tests the exact commit under review. No ambiguity about what is being tested.
+**Exact commit SHA** — use immutable SHAs for both pull requests and pushes. For a pull request, `github.sha` is a synthetic merge commit, so pass `github.event.pull_request.head.sha`. For a push, pass `github.sha`.
 
 ```yaml
-zi_ref: ${{ github.sha }}
+zi_ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
 ```
+
+The workflow recognizes a full 40-character hexadecimal value as an immutable commit SHA, fetches that object directly, and verifies that the checked-out commit matches it exactly.
 
 **Branch name** — tracks a branch continuously. Useful for nightly runs against `main` without tying to a specific commit.
 
@@ -87,7 +93,7 @@ zi_ref: v1.2.3
 
 ## Pinning the zd version
 
-The `uses:` line can reference `zd` by branch or by tag:
+The `uses:` line can reference `zd` by branch, tag, or commit SHA:
 
 ```yaml
 # Always use the latest zd (may include breaking changes)
@@ -96,8 +102,8 @@ uses: z-shell/zd/.github/workflows/test-native.yml@main
 # Pin to a specific zd release (stable, auditable)
 uses: z-shell/zd/.github/workflows/test-native.yml@v1.0.0
 
-# Pin to a specific commit SHA (most stable)
-uses: z-shell/zd/.github/workflows/test-native.yml@a1b2c3d
+# Pin to a full commit SHA (most stable)
+uses: z-shell/zd/.github/workflows/test-native.yml@a1b2c3d4e5f678901234567890abcdef12345678
 ```
 
-For production CI in a release-tracked repo, pinning to a tag or SHA is recommended. For development repos following Zi's `main` branch, `@main` is sufficient.
+For production CI, pin the reusable workflow itself to a full commit SHA. Branches and tags remain useful for development or release tracking but are mutable references.
