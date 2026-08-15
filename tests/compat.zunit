@@ -51,8 +51,13 @@
 }
 
 @test 'internal aliases can be explicitly disabled' {
-  zi_test 'alias zini zinit zplugin 2>/dev/null' 'ZI[INTERNAL_ALIASES]=0'
+  zi_test 'alias zini 2>/dev/null' 'ZI[INTERNAL_ALIASES]=0'
+  assert $state not_equal_to 0
 
+  zi_test 'alias zinit 2>/dev/null' 'ZI[INTERNAL_ALIASES]=0'
+  assert $state not_equal_to 0
+
+  zi_test 'alias zplugin 2>/dev/null' 'ZI[INTERNAL_ALIASES]=0'
   assert $state not_equal_to 0
 }
 
@@ -74,7 +79,7 @@
   assert "$output" contains "$expected"
 }
 
-@test 'update keeps legacy plugins and snippets option meanings' {
+@test 'update keeps legacy plugins-only option meaning' {
   zi_test '
     .zi-update-or-status-all() {
       (( OPTS[opt_-l,--plugins] && !OPTS[opt_-s,--snippets] )) &&
@@ -84,10 +89,19 @@
   '
   assert $state equals 0
   assert "$output" contains "plugins-only"
+}
 
-  zi_test 'zi update -s -h'
-  assert $state equals 1
-  assert "$output" contains "Update only snippets"
+@test 'update keeps snippets-only option meaning' {
+  zi_test '
+    .zi-update-or-status-all() {
+      typeset -p OPTS | grep -Fq "[opt_-s,--snippets]=1" || return 1
+      typeset -p OPTS | grep -Fq "[opt_-l,--plugins]=1" && return 1
+      print snippets-only
+    }
+    zi update -s
+  '
+  assert $state equals 0
+  assert "$output" contains "snippets-only"
 }
 
 @test 'times seconds flags use seconds without changing update short option' {
