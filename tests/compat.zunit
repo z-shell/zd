@@ -42,12 +42,17 @@
 }
 
 @test 'deprecated command aliases are enabled by default' {
-  zi_test 'alias zini zinit zplugin'
-
+  zi_test 'alias zini'
   assert $state equals 0
-  assert "$output" contains "zini=zi"
-  assert "$output" contains "zinit=zi"
-  assert "$output" contains "zplugin=zi"
+  assert "$output" equals "zini=zi"
+
+  zi_test 'alias zinit'
+  assert $state equals 0
+  assert "$output" equals "zinit=zi"
+
+  zi_test 'alias zplugin'
+  assert $state equals 0
+  assert "$output" equals "zplugin=zi"
 }
 
 @test 'internal aliases can be explicitly disabled' {
