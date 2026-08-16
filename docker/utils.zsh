@@ -75,7 +75,7 @@ zi::setup-minimal() {
 }
 
 zi::pack-zsh() {
-  local ZSH_VERSION="$1"
-  zi pack"$ZSH_VERSION" for zsh
+  local target_zsh_version="$1"
+  zi pack"$target_zsh_version" for zsh
   zi pack atload=+"zicompinit; zicdreplay" for system-completions
 }

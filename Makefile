@@ -6,7 +6,7 @@ ZI_DATA    ?= /tmp/zunit-local
 IMAGE      ?= ghcr.io/z-shell/zd
 TAG        ?= latest
 TERM       ?= xterm-256color
-TEST_FILES  = annexes ice packages plugins snippets
+TEST_FILES  = annexes ice packages plugins snippets utils
 
 ifdef FILE
 _SUITES := tests/$(FILE).zunit
