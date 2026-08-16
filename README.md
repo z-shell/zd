@@ -61,7 +61,7 @@ docker run --rm -it ghcr.io/z-shell/zd:zsh-5.9
 
 | Tag         | Zsh version          |
 | ----------- | -------------------- |
-| `latest`    | Alpine's default Zsh |
+| `latest`    | Debian's default Zsh (5.9) |
 | `zsh-5.5.1` | 5.5.1                |
 | `zsh-5.6.2` | 5.6.2                |
 | `zsh-5.7.1` | 5.7.1                |
