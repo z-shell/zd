@@ -24,65 +24,111 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # Builds one single-arch image per (Zsh version, architecture) pair on a
+  # native runner for that architecture. No QEMU: linux/arm64 legs run on
+  # GitHub-hosted ubuntu-24.04-arm runners instead of emulating arm64 on an
+  # amd64 runner, which removes the emulation tax and the setup-qemu-action
+  # binfmt-cache contention entirely. On pull_request the arm64 leg stops
+  # after checkout (see the per-step `if:` below); PRs never publish, so
+  # there is nothing for it to validate that the amd64 leg does not already
+  # cover.
   build-versioned:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.runner }}
     timeout-minutes: 75
     strategy:
       fail-fast: false
       matrix:
+        zsh_version: ["5.5.1", "5.6.2", "5.7.1", "5.8", "5.8.1", "5.9"]
+        arch: [amd64, arm64]
         include:
-          - { zsh_version: "5.5.1" }
-          - { zsh_version: "5.6.2" }
-          - { zsh_version: "5.7.1" }
-          - { zsh_version: "5.8" }
-          - { zsh_version: "5.8.1" }
-          - { zsh_version: "5.9" }
+          - { arch: amd64, runner: ubuntu-latest, platform: linux/amd64 }
+          - { arch: arm64, runner: ubuntu-24.04-arm, platform: linux/arm64 }
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-      - uses: docker/setup-qemu-action@96fe6ef7f33517b61c61be40b68a1882f3264fb8 # v4
+      # `matrix` is not available in a job-level `if:`, only in step-level
+      # `if:`, so each of the remaining steps is individually gated here
+      # rather than the whole job. On pull_request, only amd64 continues
+      # past checkout; PRs never publish, so an arm64 leg would validate
+      # nothing the amd64 leg does not already cover.
       - name: Set up Docker Buildx
         id: buildx
+        if: github.event_name != 'pull_request' || matrix.arch == 'amd64'
         uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4
         with:
           use: true
       - uses: docker/login-action@abd2ef45e78c5afb21d64d4ca52ee8550d9572c7 # v4
+        if: github.event_name != 'pull_request' || matrix.arch == 'amd64'
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Build and push
         id: docker_build_zsh_versions
+        if: github.event_name != 'pull_request' || matrix.arch == 'amd64'
         uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7
         timeout-minutes: 60
         with:
-          push: ${{ github.event.number == 0 }}
+          push: ${{ github.event_name != 'pull_request' }}
           file: ./docker/Dockerfile
           context: .
           build-args: ZSH_VERSION=${{ matrix.zsh_version }}
-          tags: ghcr.io/${{ github.repository }}:zsh-${{ matrix.zsh_version }}
-          # PRs never push or load a multi-platform result, so building
-          # arm64 under QEMU on every PR only costs time. Full multi-arch
-          # builds run on push/schedule/dispatch, where the image ships.
-          platforms: ${{ github.event_name == 'pull_request' && 'linux/amd64' || 'linux/amd64,linux/arm64' }}
-          # Scoped per Zsh version: an unscoped `type=gha` cache is shared
-          # across the whole matrix, so concurrent legs overwrite each
-          # other's cache and only one version ever gets a real hit.
-          cache-from: type=gha,scope=docker-${{ matrix.zsh_version }}
+          tags: ghcr.io/${{ github.repository }}:zsh-${{ matrix.zsh_version }}-${{ matrix.arch }}
+          platforms: ${{ matrix.platform }}
+          # Scoped per Zsh version and arch: an unscoped `type=gha` cache is
+          # shared across the whole matrix, so concurrent legs overwrite
+          # each other's cache and only one leg ever gets a real hit.
+          cache-from: type=gha,scope=docker-${{ matrix.zsh_version }}-${{ matrix.arch }}
           # PR-run cache writes are scoped to the PR ref and can never be
           # read by main or any other PR (GitHub Actions cache is
           # branch-isolated), so skip the mode=max export cost on PRs.
-          cache-to: ${{ github.event_name == 'pull_request' && format('type=gha,scope=docker-{0}', matrix.zsh_version) || format('type=gha,scope=docker-{0},mode=max', matrix.zsh_version) }}
+          cache-to: ${{ github.event_name == 'pull_request' && format('type=gha,scope=docker-{0}-{1}', matrix.zsh_version, matrix.arch) || format('type=gha,scope=docker-{0}-{1},mode=max', matrix.zsh_version, matrix.arch) }}
 
-  build-latest:
+  # Joins each Zsh version's per-arch images (built above) into the
+  # published multi-arch manifest list, matching the pre-split `zsh-<version>`
+  # tag. imagetools operates on images already in the registry, so this only
+  # runs where build-versioned actually pushed, never on pull_request.
+  publish-versioned:
+    needs: build-versioned
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        zsh_version: ["5.5.1", "5.6.2", "5.7.1", "5.8", "5.8.1", "5.9"]
+    steps:
+      - uses: docker/login-action@abd2ef45e78c5afb21d64d4ca52ee8550d9572c7 # v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create and push multi-arch manifest
+        run: |
+          docker buildx imagetools create \
+            --tag "ghcr.io/${{ github.repository }}:zsh-${{ matrix.zsh_version }}" \
+            "ghcr.io/${{ github.repository }}:zsh-${{ matrix.zsh_version }}-amd64" \
+            "ghcr.io/${{ github.repository }}:zsh-${{ matrix.zsh_version }}-arm64"
+
+  # Same per-arch-then-join split as build-versioned/publish-versioned,
+  # for the `latest` tag. Job-level `if` (rather than the previous
+  # step-level `if`) skips checkout/buildx/login entirely off `main`.
+  build-latest:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ${{ matrix.runner }}
     timeout-minutes: 40
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [amd64, arm64]
+        include:
+          - { arch: amd64, runner: ubuntu-latest, platform: linux/amd64 }
+          - { arch: arm64, runner: ubuntu-24.04-arm, platform: linux/arm64 }
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-      - uses: docker/setup-qemu-action@96fe6ef7f33517b61c61be40b68a1882f3264fb8 # v4
       - name: Set up Docker Buildx
         id: buildx
         uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4
@@ -96,13 +142,30 @@ jobs:
       - name: Build and push
         id: docker_build_latest
         uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7
-        if: github.ref == 'refs/heads/main'
         timeout-minutes: 30
         with:
           push: true
           file: ./docker/Dockerfile
           context: .
-          tags: ghcr.io/${{ github.repository }}:latest
-          platforms: linux/amd64,linux/arm64
-          cache-from: type=gha,scope=docker-latest
-          cache-to: type=gha,scope=docker-latest,mode=max
+          tags: ghcr.io/${{ github.repository }}:latest-${{ matrix.arch }}
+          platforms: ${{ matrix.platform }}
+          cache-from: type=gha,scope=docker-latest-${{ matrix.arch }}
+          cache-to: type=gha,scope=docker-latest-${{ matrix.arch }},mode=max
+
+  publish-latest:
+    needs: build-latest
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: docker/login-action@abd2ef45e78c5afb21d64d4ca52ee8550d9572c7 # v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create and push multi-arch manifest
+        run: |
+          docker buildx imagetools create \
+            --tag "ghcr.io/${{ github.repository }}:latest" \
+            "ghcr.io/${{ github.repository }}:latest-amd64" \
+            "ghcr.io/${{ github.repository }}:latest-arm64"
