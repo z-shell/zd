@@ -1,0 +1,10 @@
+#!/usr/bin/env zunit
+# -*- mode: zsh; sh-indentation: 2; indent-tabs-mode: nil; sh-basic-offset: 2; -*-
+# vim: ft=zsh sw=2 ts=2 et
+
+@test 'pack-zsh preserves the shell ZSH_VERSION parameter' {
+  run zsh -f ./tests/fixtures/pack-zsh.zsh ./docker/utils.zsh
+
+  assert $state equals 0
+  assert "$output" contains 'pack5.9 for zsh'
+}
