@@ -64,7 +64,7 @@ Runs weekly (Wednesday 03:00 UTC) and on manual dispatch. Not triggered by push 
 **Per job:**
 
 1. Build the Docker image for that Zsh version using `docker/setup-buildx-action` and `docker/build-push-action`, passing `ZSH_VERSION` as a build arg — the Dockerfile compiles that exact Zsh release from source on the `debian:trixie-slim` base
-2. Layer caching via `type=gha` — only changed layers rebuild on subsequent runs
+2. Layer caching via `type=gha`, scoped per Zsh version (`scope=test-matrix-<version>`) — only changed layers rebuild on subsequent runs. The scope is required: the GHA cache backend has no built-in isolation between concurrent builds, so a shared scope across the six-way matrix would let one leg's cache overwrite another's, leaving only one version genuinely cached per run. `test-matrix.yml` and `docker.yml` run on the identical weekly cron, so their scopes are also prefixed distinctly (`test-matrix-*` vs `docker-*`) to avoid colliding with each other.
 3. Run all test files in a single container invocation:
 
 ```sh
@@ -97,7 +97,23 @@ Builds and publishes multi-architecture images (`linux/amd64`, `linux/arm64`) to
 
 `build-latest` — builds the `latest` tag. Pushed only on `main` branch pushes.
 
-Layer caching uses `type=gha` for both jobs.
+Layer caching uses `type=gha` for both jobs, scoped per Zsh version
+(`scope=docker-<version>`, `scope=docker-latest`) for the same reason as
+`test-matrix.yml` above.
+
+On `pull_request` runs, `build-versioned` builds `linux/amd64` only and skips
+the `mode=max` cache export. Pull requests never push or load a
+multi-platform result (`push` evaluates to `false`, and there is no `load:`),
+so building `linux/arm64` under QEMU emulation on every PR only costs time.
+GitHub Actions cache is also branch-isolated: a cache a PR run writes is
+scoped to that PR and can never be restored by `main` or another PR, so
+exporting it there is pure cost. `push`/`schedule`/`workflow_dispatch` runs
+still build and cache both platforms, since those are the runs that publish.
+
+Both jobs set an explicit `timeout-minutes` (job-level, in addition to the
+existing 60-minute step-level timeout on the build step) so a stuck build
+fails within a bounded window instead of falling back to GitHub's 360-minute
+default.
 
 ---
 

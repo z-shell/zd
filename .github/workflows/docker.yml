@@ -26,6 +26,7 @@ concurrency:
 jobs:
   build-versioned:
     runs-on: ubuntu-latest
+    timeout-minutes: 75
     strategy:
       fail-fast: false
       matrix:
@@ -61,12 +62,22 @@ jobs:
           context: .
           build-args: ZSH_VERSION=${{ matrix.zsh_version }}
           tags: ghcr.io/${{ github.repository }}:zsh-${{ matrix.zsh_version }}
-          platforms: linux/amd64,linux/arm64
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          # PRs never push or load a multi-platform result, so building
+          # arm64 under QEMU on every PR only costs time. Full multi-arch
+          # builds run on push/schedule/dispatch, where the image ships.
+          platforms: ${{ github.event_name == 'pull_request' && 'linux/amd64' || 'linux/amd64,linux/arm64' }}
+          # Scoped per Zsh version: an unscoped `type=gha` cache is shared
+          # across the whole matrix, so concurrent legs overwrite each
+          # other's cache and only one version ever gets a real hit.
+          cache-from: type=gha,scope=docker-${{ matrix.zsh_version }}
+          # PR-run cache writes are scoped to the PR ref and can never be
+          # read by main or any other PR (GitHub Actions cache is
+          # branch-isolated), so skip the mode=max export cost on PRs.
+          cache-to: ${{ github.event_name == 'pull_request' && format('type=gha,scope=docker-{0}', matrix.zsh_version) || format('type=gha,scope=docker-{0},mode=max', matrix.zsh_version) }}
 
   build-latest:
     runs-on: ubuntu-latest
+    timeout-minutes: 40
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
@@ -86,11 +97,12 @@ jobs:
         id: docker_build_latest
         uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7
         if: github.ref == 'refs/heads/main'
+        timeout-minutes: 30
         with:
           push: true
           file: ./docker/Dockerfile
           context: .
           tags: ghcr.io/${{ github.repository }}:latest
           platforms: linux/amd64,linux/arm64
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+          cache-from: type=gha,scope=docker-latest
+          cache-to: type=gha,scope=docker-latest,mode=max
