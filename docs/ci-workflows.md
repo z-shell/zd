@@ -93,27 +93,52 @@ Builds and publishes multi-architecture images (`linux/amd64`, `linux/arm64`) to
 
 **Jobs:**
 
-`build-versioned` — builds one image per Zsh version (5.5.1–5.9) with tag `zsh-<version>`. Images are pushed only when the trigger is not a pull request (`github.event.number == 0`).
+Each architecture builds natively rather than through QEMU emulation:
+`linux/amd64` legs run on `ubuntu-latest`, `linux/arm64` legs run on the
+GitHub-hosted `ubuntu-24.04-arm` runner. There is no `docker/setup-qemu-action`
+step anywhere in this workflow.
 
-`build-latest` — builds the `latest` tag. Pushed only on `main` branch pushes.
+`build-versioned`: matrix of Zsh version (5.5.1–5.9) times architecture
+(`amd64`, `arm64`), 12 legs on `push`/`schedule`/`workflow_dispatch`. Each
+leg builds and pushes a single-arch, arch-suffixed tag
+(`zsh-<version>-amd64`, `zsh-<version>-arm64`). On `pull_request`, only the
+`amd64` leg runs (skipped via a job-level `if`) and nothing is pushed: PRs
+never publish, so an arm64 leg would validate nothing the amd64 leg does not
+already cover.
 
-Layer caching uses `type=gha` for both jobs, scoped per Zsh version
-(`scope=docker-<version>`, `scope=docker-latest`) for the same reason as
-`test-matrix.yml` above.
+`publish-versioned`: depends on `build-versioned`, one job per Zsh version.
+Runs `docker buildx imagetools create` to join that version's `-amd64` and
+`-arm64` tags into the published multi-arch `zsh-<version>` tag. `imagetools`
+operates on images already in the registry, so this job (like
+`build-latest`'s arm64 leg pushing) only runs off `pull_request`.
 
-On `pull_request` runs, `build-versioned` builds `linux/amd64` only and skips
-the `mode=max` cache export. Pull requests never push or load a
-multi-platform result (`push` evaluates to `false`, and there is no `load:`),
-so building `linux/arm64` under QEMU emulation on every PR only costs time.
-GitHub Actions cache is also branch-isolated: a cache a PR run writes is
-scoped to that PR and can never be restored by `main` or another PR, so
+`build-latest`/`publish-latest`: the same per-arch-build-then-join split,
+for the `latest` tag. Gated at the job level on `github.ref ==
+'refs/heads/main'`, so pull requests and non-`main` triggers skip checkout,
+Buildx setup, and login entirely rather than running them only to skip the
+build step.
+
+The per-arch `-amd64`/`-arm64` tags remain in the registry alongside the
+joined manifest tags; they are not deleted after `imagetools create` runs.
+This is a deliberate simplicity tradeoff, not an oversight; cleaning them up
+would need a further step calling the GitHub Packages API.
+
+Layer caching uses `type=gha` for every build job, scoped per Zsh version
+**and architecture** (`scope=docker-<version>-<arch>`, `scope=docker-latest-<arch>`)
+for the same reason as `test-matrix.yml` above: an unscoped or
+under-scoped cache lets concurrent legs overwrite each other's cache, so
+only one leg would ever get a real hit.
+
+On `pull_request` runs, `build-versioned`'s single `amd64` leg also skips
+the `mode=max` cache export, since GitHub Actions cache is branch-isolated:
+a cache a PR run writes can never be restored by `main` or another PR, so
 exporting it there is pure cost. `push`/`schedule`/`workflow_dispatch` runs
-still build and cache both platforms, since those are the runs that publish.
+still cache normally, since those are the runs that publish.
 
-Both jobs set an explicit `timeout-minutes` (job-level, in addition to the
-existing 60-minute step-level timeout on the build step) so a stuck build
-fails within a bounded window instead of falling back to GitHub's 360-minute
-default.
+All four jobs set an explicit `timeout-minutes` (job-level, in addition to
+the existing 60-minute step-level timeout on the build step in
+`build-versioned`/`build-latest`) so a stuck build fails within a bounded
+window instead of falling back to GitHub's 360-minute default.
 
 ---
 
