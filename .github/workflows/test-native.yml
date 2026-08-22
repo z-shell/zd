@@ -24,7 +24,7 @@ on:
         required: false
         default: ""
       zi_ref:
-        description: "Branch, tag, or SHA of zi to test."
+        description: "Branch, tag, or full commit SHA of zi to test."
         required: false
         default: "main"
   workflow_call:
@@ -35,7 +35,7 @@ on:
         required: false
         default: ""
       zi_ref:
-        description: "Branch, tag, or SHA of zi to test."
+        description: "Branch, tag, or full commit SHA of zi to test."
         type: string
         required: false
         default: "main"
@@ -48,9 +48,10 @@ jobs:
       matrix:
         file: [annexes, ice, packages, plugins, snippets]
     steps:
-      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v4
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           repository: z-shell/zd
+          ref: ${{ job.workflow_sha }}
 
       - name: Install zsh
         run: sudo apt-get update && sudo apt-get install -yq zsh
@@ -71,10 +72,21 @@ jobs:
           ZI_REF: ${{ inputs.zi_ref || 'main' }}
         run: |
           zi_home="${XDG_DATA_HOME:-${HOME}/.local/share}/zi"
-          git clone --depth 1 --branch "${ZI_REF}" \
-            "https://github.com/${ZI_REPO}.git" "${zi_home}/bin"
+          zi_bin="${zi_home}/bin"
+          mkdir -p "${zi_home}"
+          git init "${zi_bin}"
+          git -C "${zi_bin}" remote add origin "https://github.com/${ZI_REPO}.git"
+          git -C "${zi_bin}" fetch --no-tags --depth 1 origin -- "${ZI_REF}"
+          git -C "${zi_bin}" checkout --detach FETCH_HEAD
+          if [[ "${ZI_REF}" =~ ^[0-9a-fA-F]{40}$ ]]; then
+            requested_sha="$(printf '%s' "${ZI_REF}" | tr '[:upper:]' '[:lower:]')"
+            [[ "$(git -C "${zi_bin}" rev-parse HEAD)" == "${requested_sha}" ]] || {
+              echo "Resolved Zi commit does not match requested SHA: ${ZI_REF}"
+              exit 1
+            }
+          fi
           mkdir -p "${zi_home}"/{cache,completions,plugins,snippets}
-          [[ -f "${zi_home}/bin/zi.zsh" ]] || { echo "zi.zsh not found after install"; exit 1; }
+          [[ -f "${zi_bin}/zi.zsh" ]] || { echo "zi.zsh not found after install"; exit 1; }
 
       - name: "ZUnit: ${{ matrix.file }}"
         run: |

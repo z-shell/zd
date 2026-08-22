@@ -1,0 +1,5 @@
+paths:
+  .github/workflows/test-native.yml:
+    ignore:
+      # actionlint 1.7.12 predates this reusable-workflow context.
+      - 'property "workflow_sha" is not defined in object type'
