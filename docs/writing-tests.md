@@ -38,7 +38,14 @@ Every `.zunit` file follows this structure:
 **Signature:**
 
 ```zsh
-zi_test '<zi commands>'
+zi_test '<zi commands>' ['<pre-source configuration>']
+```
+
+Use the optional second argument only when a contract depends on configuration
+that Zi reads while being sourced:
+
+```zsh
+zi_test 'alias zini 2>/dev/null' 'ZI[INTERNAL_ALIASES]=0'
 ```
 
 **Minimal example:**
@@ -148,15 +155,28 @@ This means tests can be run in any order and do not depend on each other.
 
 ---
 
+## When regression coverage is required
+
+User-visible Zi behavioral changes require focused regression coverage when they
+alter a documented command, option, alias, compatibility helper, or other stable
+interface. Add an assertion that would fail if the reported behavior returned,
+and prefer deterministic parse, help, or isolated-function seams over live
+updates and other user-state mutation. Avoid asserting incidental formatting
+when a stable semantic marker is available.
+
+Internal refactors that preserve observable behavior do not require a new test
+unless they fix a demonstrated regression or change an existing contract.
+
+---
+
 ## Adding a new suite
 
 1. Create `tests/<name>.zunit` following the anatomy above.
 2. Add `<name>` to the matrix in `.github/workflows/test-native.yml`:
 
-   ```yaml
-   matrix:
-     file: [annexes, ice, packages, plugins, snippets, <name>]
-   ```
+   Add it to the appropriate matrix expression in
+   `.github/workflows/test-native.yml`. Keep suites that require an explicit Zi
+   candidate, such as `compat`, in the `zi_repo` branch of that expression.
 
 3. Verify locally before pushing:
 

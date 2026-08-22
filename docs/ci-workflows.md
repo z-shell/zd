@@ -18,7 +18,10 @@
 
 The primary CI workflow. Runs on every push to `main` (when `tests/**` or `utils.zsh` change), on all pull requests, on a weekly Monday schedule, and on manual or `workflow_call` dispatch.
 
-**Matrix:** one parallel job per `.zunit` file — `annexes`, `ice`, `packages`, `plugins`, `snippets`. Jobs run with `fail-fast: false` so a failure in one suite does not cancel the others.
+**Matrix:** ordinary ZD runs execute `annexes`, `ice`, `packages`, `plugins`,
+and `snippets`. Reusable calls that provide `zi_repo` also execute `compat`
+against the caller's explicit Zi ref. Jobs run with `fail-fast: false` so a
+failure in one suite does not cancel the others.
 
 **Steps per job:**
 

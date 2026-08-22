@@ -1,0 +1,142 @@
+#!/usr/bin/env zunit
+#
+# -*- mode: zsh; sh-indentation: 2; indent-tabs-mode: nil; sh-basic-offset: 2; -*-
+# vim: ft=zsh sw=2 ts=2 et
+#
+
+@setup {
+  load setup
+  load helpers
+  setup
+}
+
+@teardown {
+  load teardown
+  teardown
+}
+
+@test 'compatibility helpers delegate to current implementations' {
+  zi_test '
+    zicdreplay() { (( argv[1] == 11 && argv[2] == 12 )) && print cdreplay; }
+    zicdclear() { (( argv[1] == 21 )) && print cdclear; }
+    zicompinit() { (( argv[1] == 31 )) && print compinit; }
+    zicompdef() { (( argv[1] == 41 && argv[2] == 42 )) && print compdef; }
+    ziextract() { (( argv[1] == 51 )) && print extract; }
+    zi() { (( argv[1] == 61 )) && print triangle; }
+
+    zpcdreplay 11 12
+    zpcdclear 21
+    zpcompinit 31
+    zpcompdef 41 42
+    zpextract 51
+    ❮▼❯ 61
+  '
+
+  assert $state equals 0
+  assert "$output" contains "cdreplay"
+  assert "$output" contains "cdclear"
+  assert "$output" contains "compinit"
+  assert "$output" contains "compdef"
+  assert "$output" contains "extract"
+  assert "$output" contains "triangle"
+}
+
+@test 'deprecated command aliases are enabled by default' {
+  zi_test 'alias zini'
+  assert $state equals 0
+  assert "$output" equals "zini=zi"
+
+  zi_test 'alias zinit'
+  assert $state equals 0
+  assert "$output" equals "zinit=zi"
+
+  zi_test 'alias zplugin'
+  assert $state equals 0
+  assert "$output" equals "zplugin=zi"
+}
+
+@test 'internal aliases can be explicitly disabled' {
+  zi_test '
+    (( ! ${+aliases[zini]} && ! ${+aliases[zinit]} && ! ${+aliases[zplugin]} )) ||
+      exit 1
+    print aliases-disabled
+  ' 'ZI[INTERNAL_ALIASES]=0'
+  assert $state equals 0
+  assert "$output" contains "aliases-disabled"
+}
+
+@test 'version command forms report the checkout version consistently' {
+  local expected
+  local zi_bin=${ZI_BIN:-${XDG_DATA_HOME:-${HOME}/.local/share}/zi/bin}
+  expected=$(git -C "$zi_bin" describe --tags --exact-match 2>/dev/null) ||
+    expected=$(git -C "$zi_bin" rev-parse --short=7 HEAD)
+  assert $? equals 0
+  [[ -n $expected ]]
+  assert $? equals 0
+
+  zi_test 'zi -V'
+  assert $state equals 0
+  assert "$output" contains "$expected"
+
+  zi_test 'zi --version'
+  assert $state equals 0
+  assert "$output" contains "$expected"
+
+  zi_test 'zi version'
+  assert $state equals 0
+  assert "$output" contains "$expected"
+}
+
+@test 'update keeps legacy plugins-only option meaning' {
+  zi_test '
+    .zi-update-or-status-all() {
+      (( OPTS[opt_-l,--plugins] && !OPTS[opt_-s,--snippets] )) &&
+        print plugins-only
+    }
+    zi update -L
+  '
+  assert $state equals 0
+  assert "$output" contains "plugins-only"
+}
+
+@test 'update keeps snippets-only option meaning' {
+  zi_test '
+    .zi-update-or-status-all() {
+      typeset -p OPTS | grep -Fq "[opt_-s,--snippets]=1" || return 1
+      typeset -p OPTS | grep -Fq "[opt_-l,--plugins]=1" && return 1
+      print snippets-only
+    }
+    zi update -s
+  '
+  assert $state equals 0
+  assert "$output" contains "snippets-only"
+}
+
+@test 'times seconds flags use seconds without changing update short option' {
+  zi_test '
+    ZI[TIME_1_z-shell---contract]=0.125
+    ZI[AT_TIME_1_z-shell---contract]=1.125
+    ZI[START_TIME]=1.000
+    zi times -s
+  '
+  assert $state equals 0
+  assert "$output" contains "0.125 s"
+
+  zi_test '
+    ZI[TIME_1_z-shell---contract]=0.125
+    ZI[AT_TIME_1_z-shell---contract]=1.125
+    ZI[START_TIME]=1.000
+    zi times -S
+  '
+  assert $state equals 0
+  assert "$output" contains "0.125 s"
+
+  zi_test '
+    ZI[TIME_1_z-shell---contract]=0.125
+    ZI[AT_TIME_1_z-shell---contract]=1.125
+    ZI[START_TIME]=1.000
+    zi times --seconds
+  '
+  assert $state equals 0
+  assert "$output" contains "0.125 s"
+}
