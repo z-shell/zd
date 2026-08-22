@@ -4,7 +4,12 @@
 
 ## How it works
 
-When called with `zi_repo` and `zi_ref` inputs, `test-native.yml` clones that exact revision of Zi directly instead of using the default install script. The rest of the workflow is identical: the full test matrix runs (`annexes`, `compat`, `ice`, `packages`, `plugins`, `snippets`), and results appear in the caller's GitHub Actions UI.
+When called with `zi_repo` and `zi_ref` inputs, `test-native.yml` clones that
+exact revision of Zi directly instead of using the default install script. The
+full cross-repository matrix then runs (`annexes`, `compat`, `ice`, `packages`,
+`plugins`, `snippets`), and results appear in the caller's GitHub Actions UI.
+The promotion-specific `compat` suite is omitted from ordinary ZD runs that use
+Zi's stable `main` branch.
 
 This means a Zi pull request can trigger `zd` tests as part of its own CI pipeline, catching regressions in the test suite before the PR is merged.
 

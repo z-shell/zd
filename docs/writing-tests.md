@@ -174,10 +174,9 @@ unless they fix a demonstrated regression or change an existing contract.
 1. Create `tests/<name>.zunit` following the anatomy above.
 2. Add `<name>` to the matrix in `.github/workflows/test-native.yml`:
 
-   ```yaml
-   matrix:
-     file: [annexes, compat, ice, packages, plugins, snippets, <name>]
-   ```
+   Add it to the appropriate matrix expression in
+   `.github/workflows/test-native.yml`. Keep suites that require an explicit Zi
+   candidate, such as `compat`, in the `zi_repo` branch of that expression.
 
 3. Verify locally before pushing:
 
