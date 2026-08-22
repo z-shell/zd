@@ -56,20 +56,23 @@
 }
 
 @test 'internal aliases can be explicitly disabled' {
-  zi_test 'alias zini 2>/dev/null' 'ZI[INTERNAL_ALIASES]=0'
-  assert $state not_equal_to 0
-
-  zi_test 'alias zinit 2>/dev/null' 'ZI[INTERNAL_ALIASES]=0'
-  assert $state not_equal_to 0
-
-  zi_test 'alias zplugin 2>/dev/null' 'ZI[INTERNAL_ALIASES]=0'
-  assert $state not_equal_to 0
+  zi_test '
+    (( ! ${+aliases[zini]} && ! ${+aliases[zinit]} && ! ${+aliases[zplugin]} )) ||
+      exit 1
+    print aliases-disabled
+  ' 'ZI[INTERNAL_ALIASES]=0'
+  assert $state equals 0
+  assert "$output" contains "aliases-disabled"
 }
 
 @test 'version command forms report the checkout version consistently' {
   local expected
-  expected=$(git -C "$ZI_BIN" describe --tags --exact-match 2>/dev/null) ||
-    expected=$(git -C "$ZI_BIN" rev-parse --short HEAD)
+  local zi_bin=${ZI_BIN:-${XDG_DATA_HOME:-${HOME}/.local/share}/zi/bin}
+  expected=$(git -C "$zi_bin" describe --tags --exact-match 2>/dev/null) ||
+    expected=$(git -C "$zi_bin" rev-parse --short=7 HEAD)
+  assert $? equals 0
+  [[ -n $expected ]]
+  assert $? equals 0
 
   zi_test 'zi -V'
   assert $state equals 0
