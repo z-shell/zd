@@ -5,11 +5,12 @@
 ## How it works
 
 When called with `zi_repo` and `zi_ref` inputs, `test-native.yml` clones that
-exact revision of Zi directly instead of using the default install script. The
-full cross-repository matrix then runs (`annexes`, `compat`, `ice`, `packages`,
-`plugins`, `snippets`), and results appear in the caller's GitHub Actions UI.
-The promotion-specific `compat` suite is omitted from ordinary ZD runs that use
-Zi's stable `main` branch.
+exact revision of Zi directly instead of using the default install script.
+Callers may set `include_compat: true` to add the promotion-specific `compat`
+suite to the standard matrix (`annexes`, `ice`, `packages`, `plugins`,
+`snippets`). Results appear in the caller's GitHub Actions UI. Keep
+`include_compat` false for hotfixes based on Zi's stable `main` branch; enable it
+for a reviewed `next` promotion candidate.
 
 This means a Zi pull request can trigger `zd` tests as part of its own CI pipeline, catching regressions in the test suite before the PR is merged.
 
@@ -39,6 +40,7 @@ jobs:
       zi_repo: z-shell/zi # the repo being tested
       # PRs use the head commit, not GitHub's synthetic merge commit.
       zi_ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
+      include_compat: ${{ github.head_ref == 'next' }}
 ```
 
 **What each field does:**
@@ -49,6 +51,7 @@ jobs:
 | `uses: z-shell/zd/.github/workflows/test-native.yml@main`                                                  | Calls the reusable workflow at the `main` ref of `zd`                      |
 | `zi_repo: z-shell/zi`                                                                                      | Tells `zd` to clone this repo instead of using the default install         |
 | `zi_ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha \|\| github.sha }}` | Pins PRs to their head commit and pushes to the commit that triggered them |
+| `include_compat: ${{ github.head_ref == 'next' }}`                                                         | Adds promotion compatibility tests only for a `next` candidate             |
 
 The caller's `GITHUB_TOKEN` is used automatically — no additional secrets are required. Both repositories must be public.
 
@@ -56,10 +59,11 @@ The caller's `GITHUB_TOKEN` is used automatically — no additional secrets are 
 
 ## Input reference
 
-| Input     | Type     | Required | Default | Description                                                                                |
-| --------- | -------- | -------- | ------- | ------------------------------------------------------------------------------------------ |
-| `zi_repo` | `string` | No       | `""`    | GitHub repo for Zi in `owner/name` format. When empty, the default install script is used. |
-| `zi_ref`  | `string` | No       | `main`  | Branch name, tag, or full commit SHA to check out.                                         |
+| Input            | Type      | Required | Default | Description                                                                                |
+| ---------------- | --------- | -------- | ------- | ------------------------------------------------------------------------------------------ |
+| `zi_repo`        | `string`  | No       | `""`    | GitHub repo for Zi in `owner/name` format. When empty, the default install script is used. |
+| `zi_ref`         | `string`  | No       | `main`  | Branch name, tag, or full commit SHA to check out.                                         |
+| `include_compat` | `boolean` | No       | `false` | Add the promotion-specific compatibility suite to the standard matrix.                     |
 
 ---
 
