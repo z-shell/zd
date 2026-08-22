@@ -176,7 +176,8 @@ unless they fix a demonstrated regression or change an existing contract.
 
    Add it to the appropriate matrix expression in
    `.github/workflows/test-native.yml`. Keep suites that require an explicit Zi
-   candidate, such as `compat`, in the `zi_repo` branch of that expression.
+   candidate, such as `compat`, in the `include_compat` branch of that
+   expression.
 
 3. Verify locally before pushing:
 
