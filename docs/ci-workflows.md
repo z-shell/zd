@@ -16,12 +16,14 @@
 
 ## test-native.yml
 
-The primary CI workflow. Runs on every push to `main` (when `tests/**` or `utils.zsh` change), on all pull requests, on a weekly Monday schedule, and on manual or `workflow_call` dispatch.
+The primary CI workflow. Runs on every push to `main` (when `tests/**` or
+`docker/utils.zsh` change), on all pull requests, on a weekly Monday schedule,
+and on manual or `workflow_call` dispatch.
 
 **Matrix:** ordinary ZD runs execute `annexes`, `ice`, `packages`, `plugins`,
-and `snippets`. Reusable calls that set `include_compat: true` also execute
-`compat` against the caller's explicit Zi ref. Jobs run with `fail-fast: false`
-so a failure in one suite does not cancel the others.
+`snippets`, and `utils`. Reusable calls that set `include_compat: true` also
+execute `compat` against the caller's explicit Zi ref. Jobs run with
+`fail-fast: false` so a failure in one suite does not cancel the others.
 
 **Steps per job:**
 
@@ -44,8 +46,9 @@ so a failure in one suite does not cancel the others.
 
 | Input     | Default   | Description                                                               |
 | --------- | --------- | ------------------------------------------------------------------------- |
-| `zi_repo` | _(empty)_ | GitHub repo for Zi (`owner/name`). Empty uses the default install script. |
-| `zi_ref`  | `main`    | Branch, tag, or SHA to install.                                           |
+| `zi_repo`        | _(empty)_ | GitHub repo for Zi (`owner/name`). Empty uses the default install script. |
+| `zi_ref`         | `main`    | Branch, tag, or SHA to install.                                           |
+| `include_compat` | `false`   | Add the promotion-specific Zi compatibility suite.                       |
 
 ---
 
@@ -72,14 +75,26 @@ Runs weekly (Wednesday 03:00 UTC) and on manual dispatch. Not triggered by push 
 
 ```sh
 docker run --rm \
+  --env CI=true \
   --env TERM=xterm \
   --env ZI_DATA=/data \
-  --volume "${RUNNER_TEMP}/zunit:/data" \
+  --tmpfs /data:rw,exec,uid=1000,gid=1000,mode=0700 \
   "zd:${{ matrix.zsh_version }}" \
-  zsh -c 'for f in /src/tests/*.zunit; do zunit --tap --verbose "$f" || exit $?; done'
+  zsh -fc '
+    cd /src || exit 1
+    for f in tests/*.zunit; do
+      print -r -- "==> ${f}"
+      timeout 8m zunit --tap --verbose "${f}" || exit $?
+    done
+  '
 ```
 
-Running all suites in one container (rather than one container per suite) keeps the job count at 6 instead of 30.
+Each suite has an eight-minute timeout and prints its path before execution, so
+a stalled or failing suite is visible in the job log. `/data` is a writable,
+executable, container-local tmpfs because several tests install command
+artifacts there. `tests/setup.zsh` preserves the workflow-provided `ZI_DATA`
+value while resetting it between tests. Running all suites in one container
+keeps the job count at 6 instead of 42.
 
 ---
 
@@ -153,7 +168,7 @@ All workflows share a common set of variables. The table below covers every vari
 | ------------- | -------------- | --------------------------- | -------------------------------------------- |
 | `TERM`        | native, matrix | `xterm`                     | Terminal type required by Zi output          |
 | `ZI_BIN`      | native         | `$HOME/.local/share/zi/bin` | Path to Zi binary directory                  |
-| `ZI_DATA`     | native, matrix | `$RUNNER_TEMP/zunit`        | Plugin/snippet data directory                |
+| `ZI_DATA`     | native, matrix | runner temp or `/data`      | Plugin/snippet data directory                |
 | `ZI_REPO`     | native (input) | `z-shell/zi`                | Zi GitHub repo when using `workflow_call`    |
 | `ZI_REF`      | native (input) | `main`                      | Zi branch/tag/SHA when using `workflow_call` |
 | `ZSH_VERSION` | matrix, docker | _(empty)_                   | Zsh version to bake into the Docker image    |

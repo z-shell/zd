@@ -3,14 +3,23 @@
 # vim: ft=zsh sw=2 ts=2 et
 
 setup() {
-  export ZI_DATA="${TMPDIR:-/tmp}/zunit"
+  export ZI_DATA="${ZI_DATA:-${TMPDIR:-/tmp}/zunit}"
 
   {
     color magenta @setup started
     color magenta "ZI_DATA=${ZI_DATA}"
   } >&2
 
-  # Wipe and recreate between tests. Direct rm avoids glob-no-match errors.
-  rm -rf "${ZI_DATA:?}"
-  mkdir -p "${ZI_DATA}"
+  [[ ${ZI_DATA} = /* && ${ZI_DATA} != / ]] || {
+    print -u2 -r -- "Refusing unsafe ZI_DATA: ${ZI_DATA}"
+    return 1
+  }
+
+  # Preserve mount points while clearing hidden and ordinary test artifacts.
+  mkdir -p -- "${ZI_DATA}"
+  local -a artifacts=( "${ZI_DATA}"/*(DN) )
+  if (( ${#artifacts} )); then
+    chmod -R u+rwX -- "${artifacts[@]}"
+    rm -rf -- "${artifacts[@]}"
+  fi
 }

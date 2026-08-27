@@ -12,7 +12,7 @@ on:
     branches: [main]
     paths:
       - "tests/**"
-      - "utils.zsh"
+      - "docker/utils.zsh"
   pull_request:
     branches: [main]
   schedule:
@@ -56,7 +56,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        file: ${{ fromJSON(inputs.include_compat && '["annexes","compat","ice","packages","plugins","snippets"]' || '["annexes","ice","packages","plugins","snippets"]') }}
+        file: ${{ fromJSON(inputs.include_compat && '["annexes","compat","ice","packages","plugins","snippets","utils"]' || '["annexes","ice","packages","plugins","snippets","utils"]') }}
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:

@@ -47,3 +47,22 @@
   assert "$artifact" is_file
   assert "$artifact" is_readable
 }
+
+@test 'zi PZTM::archive Git sparse installation' {
+  zi_test '
+    zi ice svn silent nocompile
+    zi snippet PZTM::archive || return 1
+    .zi-get-object-path snippet PZTM::archive 2>/dev/null
+    typeset object_path="${reply[-3]}/${reply[-2]}"
+    [[ -f "${object_path}/._zi/mirror-backend" ]] || return 1
+    [[ "$(<"${object_path}/._zi/mirror-backend")" = git-sparse ]] || return 1
+    [[ ! -e "${object_path}/.git" ]] || return 1
+    [[ ! -e "${object_path}/directory/init.zsh" ]] || return 1
+    [[ -n "${fpath[(r)${object_path}/functions]}" ]] || return 1
+    (( ${+functions[archive]} )) || return 1
+    print -r -- git-sparse-consumer-ok
+  '
+
+  assert $state equals 0
+  assert "$output" contains "git-sparse-consumer-ok"
+}

@@ -14,6 +14,7 @@ RUN set -ex \
        libncurses-dev \
        build-essential \
        coreutils \
+       file \
        libpcre2-dev \
        zlib1g-dev \
        autoconf \
@@ -38,9 +39,20 @@ RUN set -ex \
        git clone --depth 1 --branch "zsh-${ZSH_VERSION}" \
          https://github.com/zsh-users/zsh.git /tmp/zsh-src \
        && cd /tmp/zsh-src \
-       && [ -f configure ] || autoreconf --install --force \
+       && ./Util/preconfig \
+       && install -m 0755 /usr/share/misc/config.sub Config/config.sub \
        && sed -i -E 's/\b(bool|num|str)(codes|names|fnames)\b/zsh_\1\2/g' Src/Modules/termcap.c \
-       && ./configure --prefix=/usr/local --enable-pcre \
+       && export CFLAGS="${CFLAGS:--O2} -Wno-error=implicit-int -Wno-error=implicit-function-declaration" \
+       && build_platform="$(dpkg --print-architecture)" \
+       && case "${build_platform}" in \
+            amd64) build_platform=x86_64 ;; \
+            arm64) build_platform=aarch64 ;; \
+          esac \
+       && ./configure \
+            --build="${build_platform}-unknown-linux-gnu" \
+            --prefix=/usr/local \
+            --with-tcsetpgrp \
+            --enable-pcre \
        && make -j"$(nproc)" \
        && make install.bin install.fns install.modules \
        && rm -rf /tmp/zsh-src ; \
@@ -49,6 +61,10 @@ RUN set -ex \
        && apt-get install -y --no-install-recommends zsh \
        && rm -rf /var/lib/apt/lists/* ; \
      fi
+
+RUN zsh -fc 'reply=$(print -r -- command-substitution-ok); [[ ${reply} = command-substitution-ok ]]'
+
+ENV LANG=C.UTF-8
 
 # Install zunit and its helpers into /usr/local/bin at build time.
 RUN git clone --depth 1 --branch v0.8.2 https://github.com/zdharma/zunit.git /tmp/zunit.git
@@ -80,7 +96,7 @@ ENV HOST=${ZHOST}
 COPY docker/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh && /entrypoint.sh
 
-# Install zi as $ZUSER at build time — no network calls at test time.
+# Install Zi as $ZUSER at build time so the core checkout is fixed per image.
 USER ${ZUSER}
 ARG ZI_BRANCH=main
 RUN git clone --depth 1 --branch "${ZI_BRANCH}" \
@@ -97,6 +113,7 @@ USER root
 COPY docker/zshenv /home/${ZUSER}/.zshenv
 COPY docker/zshrc  /home/${ZUSER}/.zshrc
 COPY docker/utils.zsh /src/utils.zsh
+COPY docker/utils.zsh /src/docker/utils.zsh
 COPY tests/        /src/tests/
 RUN chown -R ${PUID}:${PGID} /home/${ZUSER}/.zshenv /home/${ZUSER}/.zshrc /src
 

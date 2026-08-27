@@ -4,5 +4,14 @@
 
 teardown() {
   color cyan @teardown called >&2
-  [[ -n "${ZI_DATA}" ]] && rm -rf "${ZI_DATA:?}"/*
+  [[ ${ZI_DATA} = /* && ${ZI_DATA} != / ]] || {
+    print -u2 -r -- "Refusing unsafe ZI_DATA: ${ZI_DATA}"
+    return 1
+  }
+
+  local -a artifacts=( "${ZI_DATA}"/*(DN) )
+  if (( ${#artifacts} )); then
+    chmod -R u+rwX -- "${artifacts[@]}"
+    rm -rf -- "${artifacts[@]}"
+  fi
 }
