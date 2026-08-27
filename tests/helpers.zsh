@@ -16,7 +16,19 @@ zi_test() {
   local pre_source=${2:-}
   local _zi_bin="${ZI_BIN:-${XDG_DATA_HOME:-${HOME}/.local/share}/zi/bin}"
   local _zi_data="${ZI_DATA:-${TMPDIR:-/tmp}/zunit}"
-  run env NO_COLOR=1 TERM=dumb zsh -c "
+  local _test_home="${_zi_data}/home"
+  local _test_zdotdir="${_zi_data}/zdotdir"
+  local _test_config="${_zi_data}/config"
+  local _test_cache="${_zi_data}/cache"
+  mkdir -p "${_test_home}" "${_test_zdotdir}" "${_test_config}" "${_test_cache}"
+  run env \
+    HOME="${_test_home}" \
+    ZDOTDIR="${_test_zdotdir}" \
+    XDG_CONFIG_HOME="${_test_config}" \
+    XDG_CACHE_HOME="${_test_cache}" \
+    NO_COLOR=1 \
+    TERM=dumb \
+    zsh -f -c "
     typeset -gxU path
     path=( \${HOME}/go/bin \$path )
     typeset -gA ZI

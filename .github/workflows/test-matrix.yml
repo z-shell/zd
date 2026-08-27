@@ -44,10 +44,16 @@ jobs:
 
       - name: "Run all tests in Zsh ${{ matrix.zsh_version }} container"
         run: |
-          mkdir -p "${RUNNER_TEMP}/zunit"
           docker run --rm \
+            --env CI=true \
             --env TERM=xterm \
             --env ZI_DATA=/data \
-            --volume "${RUNNER_TEMP}/zunit:/data" \
+            --tmpfs /data:rw,exec,uid=1000,gid=1000,mode=0700 \
             "zd:${{ matrix.zsh_version }}" \
-            zsh -c 'cd /src/tests && for f in *.zunit; do zunit --tap --verbose "$f" || exit $?; done'
+            zsh -fc '
+              cd /src || exit 1
+              for f in tests/*.zunit; do
+                print -r -- "==> ${f}"
+                timeout 8m zunit --tap --verbose "${f}" || exit $?
+              done
+            '
