@@ -12,9 +12,13 @@
 # cycle (z-shell/zi#471, #472, #477, #478, #479, #481) with the suite green.
 #
 # Assertions live in tests/fixtures/shell-state/ and are sourced by the inner
-# shell. zunit's `run' re-quotes and evals each word of the command, so a `$' in
-# the zi_test argument is not reliably deferred to the inner shell; a sourced
-# file is parsed only there. Keep these test bodies free of inner-shell `$'.
+# shell, which keeps them out of the zi_test argument entirely. That is a
+# deliberate simplification, not a workaround: a fixture is parsed only by the
+# shell that sources it, so it cannot be affected by how any zunit build quotes
+# the command it runs. z-shell/zunit#25 fixed a fork-only defect of exactly that
+# kind, where a `$' in the argument expanded in the zunit shell instead of the
+# inner one; upstream never had it. Keeping the assertions in fixtures means
+# neither build can change what these tests measure.
 
 @setup {
   load setup

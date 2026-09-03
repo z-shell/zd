@@ -5,9 +5,9 @@
 # ships with Zsh, so resolving it requires the caller's $fpath to survive the
 # autoload substitution. See z-shell/zi#488.
 #
-# The assertions live here rather than in the zi_test argument because zunit's
-# `run' re-quotes and evals each word, so a `$' in that argument is not reliably
-# deferred to the inner shell. A sourced file is parsed only by the inner shell.
+# The assertions live here rather than in the zi_test argument because a sourced
+# file is parsed only by the inner shell, so no zunit build's command quoting can
+# change what is measured. See z-shell/zunit#25.
 
 autoload +X -Uz _main_complete
 
