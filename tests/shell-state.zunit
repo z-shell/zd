@@ -1,0 +1,78 @@
+#!/usr/bin/env zunit
+#
+# -*- mode: zsh; sh-indentation: 2; indent-tabs-mode: nil; sh-basic-offset: 2; -*-
+# vim: ft=zsh sw=2 ts=2 et
+#
+# Shell state after a load, as opposed to artifacts on disk.
+#
+# The rest of this suite asserts that files arrive and are executable. Nothing
+# asserted that the function table and completion system a plug-in builds while
+# loading are usable afterwards, and every plug-in the suite loads is
+# `as"program"'. That blind spot let six regressions through in one release
+# cycle (z-shell/zi#471, #472, #477, #478, #479, #481) with the suite green.
+#
+# Assertions live in tests/fixtures/shell-state/ and are sourced by the inner
+# shell. zunit's `run' re-quotes and evals each word of the command, so a `$' in
+# the zi_test argument is not reliably deferred to the inner shell; a sourced
+# file is parsed only there. Keep these test bodies free of inner-shell `$'.
+
+@setup {
+  load setup
+  load helpers
+  setup
+}
+
+@teardown {
+  load teardown
+  teardown
+}
+
+@test 'immediate autoload of a function the plug-in does not own resolves' {
+  # z-shell/zi#488. The substitution replaces $fpath for the duration of an
+  # `autoload +X'. Drop the caller's entries and a plug-in can resolve only its
+  # own functions, leaving a stub behind with no error at the call site.
+  # Two phases, and the first is load-bearing. On a *fresh* compinit zsh records
+  # each function's source file as it declares it, so `autoload +X' resolves from
+  # that record no matter what $fpath currently holds, and the defect is masked.
+  # Users have a cached dump; the bulk `autoload -Uz' replayed from it records
+  # nothing, so resolution falls back to $fpath. Phase one writes the dump, phase
+  # two is the shell that behaves like a real session.
+  zi_test "autoload -Uz compinit && compinit -u -d ${ZI_DATA}/zcompdump"
+
+  zi_test "
+    autoload -Uz compinit && compinit -u -d ${ZI_DATA}/zcompdump
+    zi load ${PWD}/tests/fixtures/shell-state/probe
+  "
+
+  assert $state equals 0
+  assert "$output" contains "foreign-autoload-ok"
+}
+
+@test 'fzf-tab completion wrapper holds a real body after load' {
+  # The end-to-end shape of z-shell/zi#471 and #488, and the failure users
+  # actually reported: `git ' then Tab inserting from history instead of
+  # opening a menu.
+  zi_test "autoload -Uz compinit && compinit -u -d ${ZI_DATA}/zcompdump"
+
+  zi_test "
+    autoload -Uz compinit && compinit -u -d ${ZI_DATA}/zcompdump
+    zi load Aloxaf/fzf-tab || return 1
+    source ${PWD}/tests/fixtures/shell-state/assert-fzf-tab.zsh
+  "
+
+  assert $state equals 0
+  assert "$output" contains "fzf-tab-wrapper-ok"
+}
+
+@test 'compinit run from inside a plug-in body leaves foreign functions resolvable' {
+  # z-shell/zi#471. compinit's bulk `autoload -Uz' runs while the substitution is
+  # installed, so it hands the loading plug-in every completion function in the
+  # dump. Claiming one the plug-in does not own bakes the wrong directory into
+  # the stub and the function stops resolving.
+  zi_test "autoload -Uz compinit && compinit -u -d ${ZI_DATA}/zcompdump"
+
+  zi_test "zi load ${PWD}/tests/fixtures/shell-state/inner-compinit"
+
+  assert $state equals 0
+  assert "$output" contains "inner-compinit-ok"
+}

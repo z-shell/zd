@@ -56,7 +56,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        file: ${{ fromJSON(inputs.include_compat && '["annexes","compat","ice","packages","plugins","snippets","utils"]' || '["annexes","ice","packages","plugins","snippets","utils"]') }}
+        file: ${{ fromJSON(inputs.include_compat && '["annexes","compat","ice","packages","plugins","shell-state","snippets","utils"]' || '["annexes","ice","packages","plugins","shell-state","snippets","utils"]') }}
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
