@@ -80,3 +80,25 @@
   assert $state equals 0
   assert "$output" contains "inner-compinit-ok"
 }
+
+@test 'unload removes the function, alias and $fpath entry a plug-in added' {
+  # Unload is pure shell-state work and nothing else in this suite can see it.
+  # Three unload defects are open in Zi (z-shell/zi#113, #482, #483), so the
+  # parts that do work are worth holding still. The known-broken paths are
+  # deliberately not asserted here; a test for those belongs with their fix.
+  zi_test "
+    typeset -gx ZD_UNLOAD_LOG=${ZI_DATA}/unload-callback.log
+    typeset -gx ZD_FPATH_BEFORE=\${(j.:.)fpath}
+    : > \${ZD_UNLOAD_LOG}
+
+    zi load ${PWD}/tests/fixtures/shell-state/unload || return 1
+    (( \${+functions[_zd_unload_probe]} )) || return 1
+    (( \${+aliases[_zd_unload_probe_alias]} )) || return 1
+
+    zi unload ${PWD}/tests/fixtures/shell-state/unload >/dev/null 2>&1
+    source ${PWD}/tests/fixtures/shell-state/assert-unload.zsh
+  "
+
+  assert $state equals 0
+  assert "$output" contains "unload-shell-state-ok"
+}
