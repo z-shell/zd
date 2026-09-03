@@ -21,7 +21,7 @@ The primary CI workflow. Runs on every push to `main` (when `tests/**` or
 and on manual or `workflow_call` dispatch.
 
 **Matrix:** ordinary ZD runs execute `annexes`, `ice`, `packages`, `plugins`,
-`snippets`, and `utils`. Reusable calls that set `include_compat: true` also
+`shell-state`, `snippets`, and `utils`. Reusable calls that set `include_compat: true` also
 execute `compat` against the caller's explicit Zi ref. Jobs run with
 `fail-fast: false` so a failure in one suite does not cancel the others.
 
@@ -44,11 +44,11 @@ execute `compat` against the caller's explicit Zi ref. Jobs run with
 
 **Manual dispatch inputs** (available in the GitHub Actions UI):
 
-| Input     | Default   | Description                                                               |
-| --------- | --------- | ------------------------------------------------------------------------- |
+| Input            | Default   | Description                                                               |
+| ---------------- | --------- | ------------------------------------------------------------------------- |
 | `zi_repo`        | _(empty)_ | GitHub repo for Zi (`owner/name`). Empty uses the default install script. |
 | `zi_ref`         | `main`    | Branch, tag, or SHA to install.                                           |
-| `include_compat` | `false`   | Add the promotion-specific Zi compatibility suite.                       |
+| `include_compat` | `false`   | Add the promotion-specific Zi compatibility suite.                        |
 
 ---
 

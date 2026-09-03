@@ -8,7 +8,7 @@ When called with `zi_repo` and `zi_ref` inputs, `test-native.yml` clones that
 exact revision of Zi directly instead of using the default install script.
 Callers may set `include_compat: true` to add the promotion-specific `compat`
 suite to the standard matrix (`annexes`, `ice`, `packages`, `plugins`,
-`snippets`). Results appear in the caller's GitHub Actions UI. Keep
+`shell-state`, `snippets`). Results appear in the caller's GitHub Actions UI. Keep
 `include_compat` false for hotfixes based on Zi's stable `main` branch; enable it
 for a reviewed `next` promotion candidate.
 
