@@ -90,7 +90,7 @@
 @test 'z-a-default-ice installation' {
   zi_test 'zi light z-shell/z-a-default-ice'
 
-  assert $state equals 1
+  assert $state equals 0
   assert "$output" contains "Downloading"
   assert "$output" contains "Compiling"
 
