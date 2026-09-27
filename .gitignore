@@ -1,4 +1,6 @@
 # VSCODE workspace
+__pycache__/
+*.pyc
 .vscode/*
 .vscode/settings.json
 .vscode/tasks.json

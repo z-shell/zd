@@ -1,5 +1,6 @@
 # Auto detect text files and perform LF normalization so files in repo had LF and client translates to CRLF on Windows
 * text=auto
+Makefile whitespace=blank-at-eol,blank-at-eof,space-before-tab
 *.md diff=markdown
 *.zsh text eol=lf diff=zsh
 ∧* text eol=lf diff=zsh 
