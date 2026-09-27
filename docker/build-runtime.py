@@ -15,6 +15,8 @@ RELEASES = {
 PATCH_COMMIT = "a3547fd4c165bd6c0c9c9d2643bd61b593f7bbaf"
 PATCH_SHA = "bcac19bbbb4506ae35eee6e7873c4308aba9b86e4e6d152101e3a4c4d5265255"
 PATCH_OWNER = "00d5d47783fb80c739edf89e39ae47274b9f503e"
+# 5.8.1 and 5.9 look only for PCRE1, which Debian trixie does not ship.
+PCRE2_RELEASES = {"5.9.2"}
 
 
 def download(urls, target, digest):
@@ -63,7 +65,9 @@ def main():
         # Older releases use C89 definitions rejected by newer default modes.
         cflags += " -std=gnu89"
     environment = dict(os.environ, CFLAGS=cflags)
-    configure = ["./configure", "--prefix=/opt/zsh", "--enable-multibyte", "--with-tcsetpgrp", "--enable-pcre"]
+    configure = ["./configure", "--prefix=/opt/zsh", "--enable-multibyte", "--with-tcsetpgrp"]
+    if version in PCRE2_RELEASES:
+        configure.append("--enable-pcre")
     subprocess.run(configure, cwd=source, env=environment, check=True)
     subprocess.run(["make", "-j2"], cwd=source, check=True)
     if patch != "none":
@@ -73,9 +77,14 @@ def main():
     observed = subprocess.check_output(["/opt/zsh/bin/zsh", "-f", "-c", 'print -r -- "$ZSH_VERSION"'], text=True).strip()
     if observed != version:
         raise ValueError("built runtime does not match requested version")
+    pcre_loads = subprocess.run(["/opt/zsh/bin/zsh", "-f", "-c", "zmodload zsh/pcre"],
+                                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL).returncode == 0
+    if pcre_loads != (version in PCRE2_RELEASES):
+        raise ValueError("zsh/pcre availability does not match the runtime profile")
     metadata = {"schema_version": 1, "zsh_version": version, "patch_set": patch, "patches": patches,
                 "release_url": url, "release_sha256": RELEASES[version], "cflags": cflags,
-                "configure": configure, "compiler": subprocess.check_output(["cc", "--version"], text=True).splitlines()[0]}
+                "configure": configure, "pcre": "pcre2" if pcre_loads else "unavailable",
+                "compiler": subprocess.check_output(["cc", "--version"], text=True).splitlines()[0]}
     Path("/opt/zd").mkdir(exist_ok=True)
     Path("/opt/zd/runtime.json").write_text(json.dumps(metadata, indent=2) + "\n")
 

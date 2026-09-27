@@ -15,6 +15,7 @@ import uuid
 
 
 IMAGE = re.compile(r"(?:[a-zA-Z0-9][a-zA-Z0-9._/:\-]*@)?sha256:[0-9a-f]{64}\Z")
+STARTED_MARKER = "execution-started.json"
 RESERVED_ENV = {"HOME", "ZDOTDIR", "PATH", "LANG", "LC_ALL", "TMPDIR", "ZD_SOURCE_REVISION", "ZD_INPUT_DIR", "ZD_RUNNER_IMAGE", "ZD_OUTPUT_DIR"}
 
 
@@ -22,11 +23,36 @@ def checked(arguments, **kwargs):
     return subprocess.check_output(arguments, text=True, **kwargs).strip()
 
 
-def stop_owned_container(name):
+def container_absent(name):
+    """True when gone, False when present, None when the engine cannot answer."""
+    result = subprocess.run(["docker", "ps", "--all", "--quiet", "--filter", f"name=^{name}$"],
+                            stdout=subprocess.PIPE, stderr=subprocess.DEVNULL, text=True, timeout=30)
+    if result.returncode != 0:
+        return None
+    return not (result.stdout or "").strip()
+
+
+def remove_owned_container(name, attempts=5, delay=1.0):
+    """Stop, then force-remove until absence is confirmed twice.
+
+    Killing the Docker client can leave a container created but not started,
+    which --rm never removes, or a create request still in flight.
+    """
     try:
-        result = subprocess.run(["docker", "stop", "--time", "2", name],
-                                stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=30)
-        return "stopped" if result.returncode == 0 else "stop-failed"
+        subprocess.run(["docker", "stop", "--time", "2", name],
+                       stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=30)
+        confirmed = 0
+        for _ in range(attempts):
+            subprocess.run(["docker", "rm", "--force", name],
+                           stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, timeout=30)
+            absent = container_absent(name)
+            if absent is None:
+                return "unavailable"
+            confirmed = confirmed + 1 if absent else 0
+            if confirmed == 2:
+                return "removed"
+            time.sleep(delay)
+        return "remove-failed"
     except (OSError, subprocess.TimeoutExpired):
         return "unavailable"
 
@@ -54,6 +80,9 @@ def content_identity(source, files):
         path = source / relative
         if not path.resolve().is_relative_to(source):
             raise ValueError(f"source symlink escapes checkout: {relative}")
+        # An absolute target inside the host checkout points elsewhere once copied.
+        if path.is_symlink() and os.path.isabs(os.readlink(path)):
+            raise ValueError(f"source symlink has an absolute target: {relative}")
         if path.is_symlink():
             content = os.readlink(path).encode()
             kind = b"link"
@@ -155,6 +184,8 @@ def execute(args):
                            if line.startswith("model name")), "unavailable")
     Path("/output/runtime.json").write_text(json.dumps(runtime, indent=2) + "\n")
     shutil.copyfile("/opt/zd/packages.tsv", "/output/packages.tsv")
+    # The host reads this to tell a setup failure from the workload's own exit status.
+    Path("/output", STARTED_MARKER).write_text(json.dumps({"started_at_unix": time.time()}) + "\n")
     return subprocess.run(args.command, cwd=workspace, env=environment).returncode
 
 
@@ -216,25 +247,43 @@ def run(args):
         with (args.output / "execution.log").open("w") as log:
             result = subprocess.run(command, stdout=log, stderr=subprocess.STDOUT, timeout=args.timeout)
         code = result.returncode
-        report["status"] = "passed" if code == 0 else "failed"
+        if not (args.output / STARTED_MARKER).is_file():
+            # Workspace setup or the engine failed before the workload started.
+            report["status"] = "setup-failed"
+            report["container_exit_code"] = code
+            code = 125
+        else:
+            report["status"] = "passed" if code == 0 else "failed"
     except subprocess.TimeoutExpired:
         # Killing the Docker client alone leaves its workload running.
-        report["timeout_cleanup"] = stop_owned_container(args.container_name)
-        code = 124
-        report["status"] = "timeout"
+        report["timeout_cleanup"] = remove_owned_container(args.container_name)
+        if report["timeout_cleanup"] == "removed":
+            code = 124
+            report["status"] = "timeout"
+        else:
+            code = 125
+            report["status"] = "cleanup-failed"
     except OSError as error:
         code = 125
         report["status"] = "unavailable"
         report["error"] = str(error)
     except KeyboardInterrupt:
-        report["interrupt_cleanup"] = stop_owned_container(args.container_name)
+        report["interrupt_cleanup"] = remove_owned_container(args.container_name)
         code = 130
         report["status"] = "interrupted"
     report.update(exit_code=code, finished_at_unix=time.time())
     # Detect concurrent source writes rather than presenting mismatched provenance.
-    if identity(args.source) != args.source_identity or any(identity(args.inputs[name]) != spec["identity"] for name, spec in fixtures.items()):
-        report["status"] = "invalid-source-changed"
+    try:
+        changed = identity(args.source) != args.source_identity or any(
+            identity(args.inputs[name]) != spec["identity"] for name, spec in fixtures.items())
+    except (ValueError, OSError, subprocess.CalledProcessError) as error:
+        report["status"] = "invalid-provenance-unavailable"
+        report["error"] = str(error)
         code = report["exit_code"] = 125
+    else:
+        if changed:
+            report["status"] = "invalid-source-changed"
+            code = report["exit_code"] = 125
     path.write_text(json.dumps(report, indent=2) + "\n")
     print(f"zd: {report['status']}; evidence: {args.output}")
     return code

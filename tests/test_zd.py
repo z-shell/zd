@@ -41,11 +41,33 @@ class ExecutionContract(unittest.TestCase):
             return "fixture\0"
         return "a" * 40 if "rev-parse" in arguments else ""
 
-    def run_cli(self, extra=(), effect=None):
-        with patch.object(zd, "checked", side_effect=self.checked), patch.object(zd.subprocess, "run") as run:
-            run.side_effect = effect or (lambda *a, **kw: subprocess.CompletedProcess(a[0], 0))
+    def run_cli(self, extra=(), effect=None, started=True, checked=None):
+        effect = effect or (lambda *a, **kw: subprocess.CompletedProcess(a[0], 0))
+        def docker(arguments, **kwargs):
+            # The container writes this marker once setup succeeds.
+            if started and arguments[:2] == ["docker", "run"]:
+                (self.output / zd.STARTED_MARKER).write_text("{}")
+            return effect(arguments, **kwargs)
+        with patch.object(zd, "checked", side_effect=checked or self.checked), \
+                patch.object(zd.subprocess, "run", side_effect=docker) as run, patch.object(zd.time, "sleep"):
             status = zd.main(self.arguments(*extra))
             return status, run
+
+    def report(self):
+        return json.loads((self.output / "execution.json").read_text())
+
+    def timeout_with_cleanup(self, listing):
+        """Time out the run, then answer cleanup calls; listing returns docker ps output or None."""
+        def effect(arguments, **kwargs):
+            if arguments[1] == "run":
+                raise subprocess.TimeoutExpired(arguments, 1)
+            self.assertIn(arguments[1], {"stop", "rm", "ps"})
+            self.assertTrue(any(part.startswith("zd-") or part.startswith("name=^zd-") for part in arguments))
+            if arguments[1] == "ps":
+                stdout = listing()
+                return subprocess.CompletedProcess(arguments, 1 if stdout is None else 0, stdout=stdout or "")
+            return subprocess.CompletedProcess(arguments, 0)
+        return effect
 
     def test_immutable_image_reference(self):
         self.assertTrue(zd.IMAGE.fullmatch("ghcr.io/z-shell/zd@" + IMAGE_ID))
@@ -55,6 +77,16 @@ class ExecutionContract(unittest.TestCase):
         (self.source / "escape").symlink_to(self.root)
         with self.assertRaisesRegex(ValueError, "escapes"):
             zd.content_identity(self.source, ["escape"])
+
+    def test_absolute_symlink_inside_checkout_is_rejected(self):
+        # It resolves inside the host checkout but not once copied to /work/source.
+        (self.source / "inside").symlink_to(self.source / "fixture")
+        with self.assertRaisesRegex(ValueError, "absolute target"):
+            zd.content_identity(self.source, ["inside"])
+
+    def test_relative_symlink_inside_checkout_is_accepted(self):
+        (self.source / "inside").symlink_to("fixture")
+        self.assertEqual(zd.content_identity(self.source, ["inside"])["entries"], 1)
 
     def test_parent_symlink_cannot_expose_external_file(self):
         (self.root / "private").write_text("must not read")
@@ -105,16 +137,51 @@ class ExecutionContract(unittest.TestCase):
         self.assertEqual(json.loads((self.output / "execution.json").read_text())["status"], "failed")
         self.assertTrue((self.output / "execution.log").exists())
 
-    def test_timeout_stops_only_named_owned_container(self):
-        def timeout(arguments, **kwargs):
-            if arguments[1] == "run":
-                raise subprocess.TimeoutExpired(arguments, 1)
-            self.assertEqual(arguments[:4], ["docker", "stop", "--time", "2"])
-            self.assertTrue(arguments[4].startswith("zd-"))
-            return subprocess.CompletedProcess(arguments, 0)
-        status, calls = self.run_cli(effect=timeout)
+    def test_timeout_removes_only_named_owned_container(self):
+        status, calls = self.run_cli(effect=self.timeout_with_cleanup(lambda: ""))
         self.assertEqual(status, 124)
-        self.assertEqual(calls.call_count, 2)
+        operations = [call.args[0][1] for call in calls.call_args_list]
+        self.assertEqual(operations, ["run", "stop", "rm", "ps", "rm", "ps"])
+        self.assertEqual(self.report()["timeout_cleanup"], "removed")
+
+    def test_timeout_with_surviving_container_is_infrastructure_error(self):
+        # A container created after the client was killed keeps reappearing in the listing.
+        status, _ = self.run_cli(effect=self.timeout_with_cleanup(lambda: "abc123\n"))
+        self.assertEqual(status, 125)
+        self.assertEqual(self.report()["status"], "cleanup-failed")
+        self.assertEqual(self.report()["timeout_cleanup"], "remove-failed")
+
+    def test_timeout_with_unreachable_engine_is_infrastructure_error(self):
+        status, _ = self.run_cli(effect=self.timeout_with_cleanup(lambda: None))
+        self.assertEqual(status, 125)
+        self.assertEqual(self.report()["status"], "cleanup-failed")
+        self.assertEqual(self.report()["timeout_cleanup"], "unavailable")
+
+    def test_setup_failure_is_not_a_workload_failure(self):
+        status, _ = self.run_cli(effect=lambda *a, **kw: subprocess.CompletedProcess(a[0], 125), started=False)
+        self.assertEqual(status, 125)
+        self.assertEqual(self.report()["status"], "setup-failed")
+        self.assertEqual(self.report()["container_exit_code"], 125)
+
+    def test_workload_exit_125_after_setup_is_a_workload_failure(self):
+        status, _ = self.run_cli(effect=lambda *a, **kw: subprocess.CompletedProcess(a[0], 125))
+        self.assertEqual(status, 125)
+        self.assertEqual(self.report()["status"], "failed")
+
+    def test_unavailable_provenance_still_finishes_evidence(self):
+        state = {"ran": False}
+        def effect(arguments, **kwargs):
+            state["ran"] = True
+            return subprocess.CompletedProcess(arguments, 0)
+        def checked(arguments, **kwargs):
+            if state["ran"] and "rev-parse" in arguments:
+                raise subprocess.CalledProcessError(128, arguments)
+            return self.checked(arguments, **kwargs)
+        status, _ = self.run_cli(effect=effect, checked=checked)
+        self.assertEqual(status, 125)
+        report = self.report()
+        self.assertEqual(report["status"], "invalid-provenance-unavailable")
+        self.assertIn("finished_at_unix", report)
 
     def test_concurrent_source_change_invalidates_identity(self):
         def mutate(arguments, **kwargs):

@@ -23,6 +23,8 @@ qualified by patched-runtime evidence. Supported source releases are 5.8.1,
 5.9 and 5.9.2; older releases select GNU89 compiler mode, recorded in runtime
 provenance. Profile qualification is separate from source-version support.
 
+Only 5.9.2 includes `zsh/pcre`: 5.8.1 and 5.9 support only PCRE1, which Debian trixie does not ship. The build fails if the module's presence differs from that expectation, and `runtime.json` records it as `pcre: pcre2` or `pcre: unavailable`.
+
 Resolve the built image ID with `docker image inspect --format '{{.Id}}'
 IMAGE:TAG`. Pass that immutable ID locally, or a registry image digest in CI.
 Mutable tags are refused by the runner. Pull registry digests before running;
@@ -50,11 +52,29 @@ variables when source archives need a version string or an output location.
 The source identity includes a content hash of copied working-tree inputs,
 including nonignored untracked files and permissions. Git owns the inventory;
 ignored tooling caches are omitted and submodules must be initialized.
-Escaping symlinks and overlapping
+Escaping symlinks, symlinks with absolute targets and overlapping
 source/output mounts are refused. Supply a fresh, empty output directory.
 Do not run another writer in the source checkout during validation; concurrent
 source changes invalidate evidence. Runtime metadata and exact image package
 versions are retained alongside execution status and logs, including failures.
+
+### Status and exit codes
+
+`status` in `execution.json` is authoritative. The runner's exit code is the workload's own code on `passed` and `failed`, so a workload that exits 124 or 125 looks like a runner timeout or error by exit code alone.
+
+| `status`                         | Exit code     | Meaning                                                                                                                                             |
+| -------------------------------- | ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `passed`                         | 0             | The workload started and exited 0.                                                                                                                  |
+| `failed`                         | workload code | The workload started and exited nonzero.                                                                                                            |
+| `setup-failed`                   | 125           | The container exited before starting the workload: workspace copy, identity check or engine failure. `container_exit_code` keeps the observed code. |
+| `timeout`                        | 124           | The timeout expired and the named container was confirmed removed.                                                                                  |
+| `cleanup-failed`                 | 125           | The timeout expired and the container could not be confirmed removed; `timeout_cleanup` says why.                                                   |
+| `interrupted`                    | 130           | The runner was interrupted; `interrupt_cleanup` records container removal.                                                                          |
+| `unavailable`                    | 125           | Docker could not be started.                                                                                                                        |
+| `invalid-source-changed`         | 125           | A source or fixture checkout changed during execution.                                                                                              |
+| `invalid-provenance-unavailable` | 125           | The source or fixture identity could not be recomputed after execution; `error` says why.                                                           |
+
+The container writes `execution-started.json` to the output directory immediately before starting the workload; the runner uses it to distinguish `setup-failed` from `failed`.
 
 Supply prepared fixture checkouts with `--input zi=/checkouts/zi`. Each named
 checkout is hashed, mounted read-only and copied without Git metadata under

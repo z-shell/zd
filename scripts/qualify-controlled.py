@@ -25,6 +25,8 @@ assert 'QUALIFICATION_HOST_SECRET' not in os.environ
 pathlib.Path('zd-source-write-probe').write_text('only in container copy')
 runtime = json.loads(pathlib.Path('/opt/zd/runtime.json').read_text())
 assert subprocess.check_output(['zsh', '-f', '-c', 'print -r -- "$ZSH_VERSION"'], text=True).strip() == runtime['zsh_version']
+pcre_loads = subprocess.run(['zsh', '-f', '-c', 'zmodload zsh/pcre'], stderr=subprocess.DEVNULL).returncode == 0
+assert pcre_loads == (runtime['pcre'] == 'pcre2'), 'zsh/pcre availability differs from runtime.json'
 pathlib.Path('/output/probe.json').write_text(json.dumps({'isolated': True, 'runtime': runtime}))
 '''
     statuses = []
@@ -42,8 +44,9 @@ pathlib.Path('/output/probe.json').write_text(json.dumps({'isolated': True, 'run
         assert status["exit_code"] == expected
         statuses.append({"case": name, "exit_code": expected, "status": status["status"]})
     assert not (root / "zd-source-write-probe").exists()
-    # The runner's temporary named containers must be gone after normal exit and timeout.
-    remaining = subprocess.check_output(["docker", "ps", "--format", "{{.Names}}"], text=True).splitlines()
+    # The runner's temporary named containers must be gone after normal exit and timeout,
+    # including any that were created but never started.
+    remaining = subprocess.check_output(["docker", "ps", "--all", "--format", "{{.Names}}"], text=True).splitlines()
     # Check these runs only, without asserting anything about another caller's containers.
     for name in ["success", "functional-failure", "timeout"]:
         log = (args.output / name / "execution.json").read_text()
