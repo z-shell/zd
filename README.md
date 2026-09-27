@@ -16,7 +16,7 @@ The image is based on **Debian trixie-slim** (`debian:trixie-slim`), providing f
 
                     ┌─────────────────────────────────┐
   weekly ──────────▶│         test-matrix.yml          │
-  workflow_dispatch │  Docker · Zsh 5.5.1 – 5.9        │
+  workflow_dispatch │  Docker · Zsh 5.5.1 – 5.9.2      │
                     │  one job per Zsh version          │
                     └─────────────────────────────────┘
 
@@ -73,6 +73,7 @@ isolation, provenance and benchmark limits. These profiles do not load Zi.
 | `zsh-5.8`   | 5.8                        |
 | `zsh-5.8.1` | 5.8.1                      |
 | `zsh-5.9`   | 5.9                        |
+| `zsh-5.9.2` | 5.9.2                      |
 
 Images are published to `ghcr.io/z-shell/zd` on every push to `main` and on a weekly schedule.
 
