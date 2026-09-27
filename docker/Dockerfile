@@ -32,6 +32,8 @@ RUN set -ex \
 # When ZSH_VERSION is set, compile that exact release from the GitHub mirror.
 # Tags are formatted as zsh-X.Y.Z (e.g. zsh-5.9).
 # Otherwise install the distro-packaged zsh (Debian trixie ships 5.9).
+# Before 5.9.2, configure misses ncurses' boolcodes and friends, so termcap.c
+# compiles its own tables, which clash with term.h; rename them only then.
 ARG ZSH_VERSION
 # hadolint ignore=DL3003
 RUN set -ex \
@@ -41,7 +43,6 @@ RUN set -ex \
        && cd /tmp/zsh-src \
        && ./Util/preconfig \
        && install -m 0755 /usr/share/misc/config.sub Config/config.sub \
-       && sed -i -E 's/\b(bool|num|str)(codes|names|fnames)\b/zsh_\1\2/g' Src/Modules/termcap.c \
        && export CFLAGS="${CFLAGS:--O2} -Wno-error=implicit-int -Wno-error=implicit-function-declaration" \
        && build_platform="$(dpkg --print-architecture)" \
        && case "${build_platform}" in \
@@ -53,6 +54,9 @@ RUN set -ex \
             --prefix=/usr/local \
             --with-tcsetpgrp \
             --enable-pcre \
+       && if ! grep -q '^#define HAVE_BOOLCODES 1' config.h; then \
+            sed -i -E 's/\b(bool|num|str)(codes|names|fnames)\b/zsh_\1\2/g' Src/Modules/termcap.c ; \
+          fi \
        && make -j"$(nproc)" \
        && make install.bin install.fns install.modules \
        && rm -rf /tmp/zsh-src ; \

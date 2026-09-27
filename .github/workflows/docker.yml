@@ -38,7 +38,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        zsh_version: ["5.5.1", "5.6.2", "5.7.1", "5.8", "5.8.1", "5.9"]
+        zsh_version: ["5.5.1", "5.6.2", "5.7.1", "5.8", "5.8.1", "5.9", "5.9.2"]
         arch: [amd64, arm64]
         include:
           - { arch: amd64, runner: ubuntu-latest, platform: linux/amd64 }
@@ -97,7 +97,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        zsh_version: ["5.5.1", "5.6.2", "5.7.1", "5.8", "5.8.1", "5.9"]
+        zsh_version: ["5.5.1", "5.6.2", "5.7.1", "5.8", "5.8.1", "5.9", "5.9.2"]
     steps:
       - uses: docker/login-action@abd2ef45e78c5afb21d64d4ca52ee8550d9572c7 # v4
         with:
