@@ -1,0 +1,75 @@
+name: Controlled zd Images
+on:
+  pull_request:
+    paths:
+      [
+        "docker/controlled.Dockerfile",
+        "docker/build-runtime.py",
+        "scripts/zd.py",
+        "scripts/qualify-controlled.py",
+        "tests/test_zd.py",
+        "bin/zd",
+        ".github/workflows/controlled-images.yml",
+      ]
+  push:
+    branches: [main]
+    paths:
+      [
+        "docker/controlled.Dockerfile",
+        "docker/build-runtime.py",
+        "scripts/zd.py",
+        "scripts/qualify-controlled.py",
+        "tests/test_zd.py",
+        "bin/zd",
+        ".github/workflows/controlled-images.yml",
+      ]
+  workflow_dispatch: {}
+permissions:
+  contents: read
+concurrency:
+  group: controlled-zd-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  qualify:
+    name: ${{ matrix.profile }} Zsh ${{ matrix.runtime.version }} ${{ matrix.runtime.patch }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        profile: [runtime, module-build]
+        runtime:
+          - { version: "5.8.1", patch: none }
+          - { version: "5.9.2", patch: trap-bounds-a3547fd4 }
+    steps:
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+      - name: Test runner contracts
+        run: python3 -m unittest discover -s tests -p test_zd.py -v
+      - uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4
+      - name: Build selected controlled profile
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7
+        with:
+          context: .
+          file: docker/controlled.Dockerfile
+          target: ${{ matrix.profile }}
+          load: true
+          push: false
+          tags: zd-controlled:qualification
+          build-args: |
+            ZSH_VERSION=${{ matrix.runtime.version }}
+            ZSH_PATCH_SET=${{ matrix.runtime.patch }}
+      - name: Qualify observable behavior
+        env:
+          PROFILE: ${{ matrix.profile }}
+        run: |
+          image=$(docker image inspect --format '{{.Id}}' zd-controlled:qualification)
+          python3 scripts/qualify-controlled.py --image "$image" --profile "$PROFILE" --output "$RUNNER_TEMP/zd-qualification"
+      - name: Retain qualification evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: zd-${{ matrix.profile }}-${{ matrix.runtime.version }}-${{ matrix.runtime.patch }}
+          path: ${{ runner.temp }}/zd-qualification
+          if-no-files-found: error

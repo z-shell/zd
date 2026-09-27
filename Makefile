@@ -14,7 +14,7 @@ else
 _SUITES := $(patsubst %,tests/%.zunit,$(TEST_FILES))
 endif
 
-.PHONY: test run shell build help
+.PHONY: test run shell build controlled-build help
 
 ## test [FILE=<suite>]              — run ZUnit natively (all suites, or one)
 test: bin/zunit
@@ -55,6 +55,16 @@ build:
 ## help                             — list available targets
 help:
 	@grep -E '^## ' Makefile | sed 's/^## /  /'
+
+# Controlled profiles deliberately do not change the interactive image.
+PROFILE ?= runtime
+ZSH_VERSION ?= 5.9.2
+ZSH_PATCH_SET ?= none
+## controlled-build PROFILE=<runtime|module-build> ZSH_VERSION=<version> ZSH_PATCH_SET=<profile>
+controlled-build:
+	docker build --file docker/controlled.Dockerfile --target "$(PROFILE)" \
+	  --build-arg "ZSH_VERSION=$(ZSH_VERSION)" --build-arg "ZSH_PATCH_SET=$(ZSH_PATCH_SET)" \
+	  --tag "$(IMAGE):$(PROFILE)-$(ZSH_VERSION)-$(ZSH_PATCH_SET)" .
 
 # Install zunit + helpers into bin/ — mirrors what test-native.yml does in CI.
 bin/zunit:

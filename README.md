@@ -50,6 +50,11 @@ docker run --rm -it ghcr.io/z-shell/zd:zsh-5.9
 
 ## Documentation
 
+For clean Linux validation and compiled-module builds, use the separate
+`runtime` and `module-build` profiles with the shared `bin/zd run` interface.
+See [controlled execution](docs/controlled-execution.md) for image selection,
+isolation, provenance and benchmark limits. These profiles do not load Zi.
+
 | Topic                                                      | File                                           |
 | ---------------------------------------------------------- | ---------------------------------------------- |
 | Local testing — Makefile targets, env vars, Docker         | [docs/local-testing.md](docs/local-testing.md) |
@@ -59,15 +64,15 @@ docker run --rm -it ghcr.io/z-shell/zd:zsh-5.9
 
 ## Available Image Tags
 
-| Tag         | Zsh version          |
-| ----------- | -------------------- |
+| Tag         | Zsh version                |
+| ----------- | -------------------------- |
 | `latest`    | Debian's default Zsh (5.9) |
-| `zsh-5.5.1` | 5.5.1                |
-| `zsh-5.6.2` | 5.6.2                |
-| `zsh-5.7.1` | 5.7.1                |
-| `zsh-5.8`   | 5.8                  |
-| `zsh-5.8.1` | 5.8.1                |
-| `zsh-5.9`   | 5.9                  |
+| `zsh-5.5.1` | 5.5.1                      |
+| `zsh-5.6.2` | 5.6.2                      |
+| `zsh-5.7.1` | 5.7.1                      |
+| `zsh-5.8`   | 5.8                        |
+| `zsh-5.8.1` | 5.8.1                      |
+| `zsh-5.9`   | 5.9                        |
 
 Images are published to `ghcr.io/z-shell/zd` on every push to `main` and on a weekly schedule.
 
