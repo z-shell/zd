@@ -32,6 +32,8 @@ RUN set -ex \
 # When ZSH_VERSION is set, compile that exact release from the GitHub mirror.
 # Tags are formatted as zsh-X.Y.Z (e.g. zsh-5.9).
 # Otherwise install the distro-packaged zsh (Debian trixie ships 5.9).
+# Releases up to 5.9 probe only PCRE1, which trixie does not ship, so zsh/pcre
+# is enabled only where configure looks for pcre2, and must then load.
 # Before 5.9.2, configure misses ncurses' boolcodes and friends, so termcap.c
 # compiles its own tables, which clash with term.h; rename them only then.
 ARG ZSH_VERSION
@@ -49,16 +51,19 @@ RUN set -ex \
             amd64) build_platform=x86_64 ;; \
             arm64) build_platform=aarch64 ;; \
           esac \
+       && pcre_flag= \
+       && if grep -q pcre2-config configure.ac; then pcre_flag=--enable-pcre; fi \
        && ./configure \
             --build="${build_platform}-unknown-linux-gnu" \
             --prefix=/usr/local \
             --with-tcsetpgrp \
-            --enable-pcre \
+            ${pcre_flag:+"$pcre_flag"} \
        && if ! grep -q '^#define HAVE_BOOLCODES 1' config.h; then \
             sed -i -E 's/\b(bool|num|str)(codes|names|fnames)\b/zsh_\1\2/g' Src/Modules/termcap.c ; \
           fi \
        && make -j"$(nproc)" \
        && make install.bin install.fns install.modules \
+       && if [ -n "${pcre_flag}" ]; then /usr/local/bin/zsh -fc 'zmodload zsh/pcre'; fi \
        && rm -rf /tmp/zsh-src ; \
      else \
        apt-get update \
