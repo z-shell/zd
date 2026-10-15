@@ -26,6 +26,7 @@ zi_test() {
     ZDOTDIR="${_test_zdotdir}" \
     XDG_CONFIG_HOME="${_test_config}" \
     XDG_CACHE_HOME="${_test_cache}" \
+    ZPFX="${_zi_data}/polaris" \
     NO_COLOR=1 \
     TERM=dumb \
     zsh -f -c "
