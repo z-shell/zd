@@ -75,8 +75,12 @@ RUN zsh -fc 'reply=$(print -r -- command-substitution-ok); [[ ${reply} = command
 
 ENV LANG=C.UTF-8
 
-# Install zunit and its helpers into /usr/local/bin at build time.
-RUN git clone --depth 1 --branch v0.8.2 https://github.com/zdharma/zunit.git /tmp/zunit.git
+# Install zunit and its helpers into /usr/local/bin at build time: ZUnit 0.8.2
+# as released (bce183c), from z-shell/zunit, like test-native.yml.
+RUN git init -q /tmp/zunit.git \
+  && git -C /tmp/zunit.git remote add origin https://github.com/z-shell/zunit.git \
+  && git -C /tmp/zunit.git fetch -q --depth 1 origin bce183c39a3b51a3dd838835516a37222aad921f \
+  && git -C /tmp/zunit.git checkout -q --detach FETCH_HEAD
 WORKDIR /tmp/zunit.git
 RUN set -ex \
   && ./build.zsh \

@@ -7,6 +7,11 @@ IMAGE      ?= ghcr.io/z-shell/zd
 TAG        ?= latest
 TERM       ?= xterm-256color
 TEST_FILES  = annexes compat ice packages plugins shell-state snippets utils
+# Test tool revisions. The stamp is named after both, so changing either
+# reinstalls bin/ on the next `make test`.
+ZUNIT_COMMIT := bce183c39a3b51a3dd838835516a37222aad921f
+SRC_COMMIT   := 9335c8c14e0aaa845277f882969c146755e1241e
+TOOLS_STAMP  := bin/.tools-$(ZUNIT_COMMIT)-$(SRC_COMMIT)
 
 ifdef FILE
 _SUITES := tests/$(FILE).zunit
@@ -17,7 +22,7 @@ endif
 .PHONY: test run shell build controlled-build help
 
 ## test [FILE=<suite>]              — run ZUnit natively (all suites, or one)
-test: bin/zunit
+test: $(TOOLS_STAMP)
 	@for f in $(_SUITES); do \
 	  echo "==> $$f"; \
 	  PATH="$(CURDIR)/bin:$$PATH" \
@@ -67,17 +72,24 @@ controlled-build:
 	  --tag "$(IMAGE):$(PROFILE)-$(ZSH_VERSION)-$(ZSH_PATCH_SET)" .
 
 # Install zunit + helpers into bin/ — mirrors what test-native.yml does in CI.
-bin/zunit:
+bin/zunit: $(TOOLS_STAMP)
+
+$(TOOLS_STAMP):
 	@echo "Installing zunit into bin/ ..."
 	@mkdir -p bin
-	@curl -fsSL 'https://raw.githubusercontent.com/zdharma/revolver/v0.2.4/revolver' \
+	@rm -f bin/.tools-*
+	@curl -fsSL 'https://raw.githubusercontent.com/z-shell/src/$(SRC_COMMIT)/lib/zsh/snippets/revolver' \
 	  > bin/revolver
-	@curl -fsSL 'https://raw.githubusercontent.com/zdharma/color/d8f91ab5fcfceb623ae45d3333ad0e543775549c/color.zsh' \
+	@curl -fsSL 'https://raw.githubusercontent.com/z-shell/src/$(SRC_COMMIT)/lib/zsh/snippets/color.zsh' \
 	  > bin/color
 	@rm -rf /tmp/zunit.git
-	@git clone --depth 1 https://github.com/zdharma/zunit.git /tmp/zunit.git
+	@git init -q /tmp/zunit.git
+	@git -C /tmp/zunit.git remote add origin https://github.com/z-shell/zunit.git
+	@git -C /tmp/zunit.git fetch -q --depth 1 origin $(ZUNIT_COMMIT)
+	@git -C /tmp/zunit.git checkout -q --detach FETCH_HEAD
 	@cd /tmp/zunit.git && ./build.zsh
 	@mv /tmp/zunit.git/zunit bin/zunit
 	@chmod u+x bin/color bin/revolver bin/zunit
 	@rm -rf /tmp/zunit.git
+	@touch $@
 	@echo "Done."

@@ -69,9 +69,14 @@ jobs:
       - name: Install zunit
         run: |
           mkdir -p bin
-          curl -fsSL 'https://raw.githubusercontent.com/zdharma/revolver/v0.2.4/revolver' > bin/revolver
-          curl -fsSL 'https://raw.githubusercontent.com/zdharma/color/d8f91ab5fcfceb623ae45d3333ad0e543775549c/color.zsh' > bin/color
-          git clone --depth 1 --branch v0.8.2 https://github.com/zdharma/zunit.git zunit.git
+          curl -fsSL 'https://raw.githubusercontent.com/z-shell/src/9335c8c14e0aaa845277f882969c146755e1241e/lib/zsh/snippets/revolver' > bin/revolver
+          curl -fsSL 'https://raw.githubusercontent.com/z-shell/src/9335c8c14e0aaa845277f882969c146755e1241e/lib/zsh/snippets/color.zsh' > bin/color
+          # ZUnit 0.8.2 as released (bce183c). z-shell/zunit's own v0.8.2 tag
+          # re-evaluates run arguments, which tests/helpers.zsh does not expect yet.
+          git init zunit.git
+          git -C zunit.git remote add origin https://github.com/z-shell/zunit.git
+          git -C zunit.git fetch --depth 1 origin bce183c39a3b51a3dd838835516a37222aad921f
+          git -C zunit.git checkout --detach FETCH_HEAD
           cd zunit.git && ./build.zsh && cd ..
           mv zunit.git/zunit bin/
           chmod u+x bin/{color,revolver,zunit}

@@ -133,3 +133,9 @@ NEWS.md
 Untitled-1.sh
 CLAUDE.md
 GEMINI.md
+
+# Test tools installed by `make bin/zunit` and test-native.yml; never committed.
+/bin/color
+/bin/revolver
+/bin/zunit
+/bin/.tools-*
