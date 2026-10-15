@@ -27,6 +27,7 @@ zi_test() {
     XDG_CONFIG_HOME="${_test_config}" \
     XDG_CACHE_HOME="${_test_cache}" \
     ZPFX="${_zi_data}/polaris" \
+    GOPATH="${_test_home}/go" \
     NO_COLOR=1 \
     TERM=dumb \
     zsh -f -c "

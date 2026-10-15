@@ -103,11 +103,12 @@
   assert "$output" contains "unload-shell-state-ok"
 }
 
-@test 'a ZPFX exported by the caller does not reach the test shell' {
-  # A developer shell running zi exports ZPFX. Passed through, it sent sbin
-  # shims from these tests into the developer's own polaris/bin, pointing at
-  # files the next run deletes, and failed the ice suite's artifact check.
-  local -x ZPFX=${ZI_DATA}/caller-polaris
+@test 'a ZPFX or GOPATH exported by the caller does not reach the test shell' {
+  # A developer shell running zi exports ZPFX, and often GOPATH. Passed
+  # through, they sent sbin shims from these tests into the developer's own
+  # polaris/bin, pointing at files the next run deletes, and `go install'
+  # binaries into the developer's own Go bin directory.
+  local -x ZPFX=${ZI_DATA}/caller-polaris GOPATH=${ZI_DATA}/caller-go
 
   zi_test "source ${PWD}/tests/fixtures/shell-state/assert-zpfx.zsh"
 
