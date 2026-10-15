@@ -70,12 +70,15 @@ controlled-build:
 bin/zunit:
 	@echo "Installing zunit into bin/ ..."
 	@mkdir -p bin
-	@curl -fsSL 'https://raw.githubusercontent.com/zdharma/revolver/v0.2.4/revolver' \
+	@curl -fsSL 'https://raw.githubusercontent.com/z-shell/src/9335c8c14e0aaa845277f882969c146755e1241e/lib/zsh/snippets/revolver' \
 	  > bin/revolver
-	@curl -fsSL 'https://raw.githubusercontent.com/zdharma/color/d8f91ab5fcfceb623ae45d3333ad0e543775549c/color.zsh' \
+	@curl -fsSL 'https://raw.githubusercontent.com/z-shell/src/9335c8c14e0aaa845277f882969c146755e1241e/lib/zsh/snippets/color.zsh' \
 	  > bin/color
 	@rm -rf /tmp/zunit.git
-	@git clone --depth 1 https://github.com/zdharma/zunit.git /tmp/zunit.git
+	@git init -q /tmp/zunit.git
+	@git -C /tmp/zunit.git remote add origin https://github.com/z-shell/zunit.git
+	@git -C /tmp/zunit.git fetch -q --depth 1 origin bce183c39a3b51a3dd838835516a37222aad921f
+	@git -C /tmp/zunit.git checkout -q --detach FETCH_HEAD
 	@cd /tmp/zunit.git && ./build.zsh
 	@mv /tmp/zunit.git/zunit bin/zunit
 	@chmod u+x bin/color bin/revolver bin/zunit
