@@ -33,7 +33,7 @@ Every `.zunit` file follows this structure:
 
 ## The `zi_test` helper
 
-`zi_test` is the core of every test. It spawns a fresh, isolated Zsh subprocess, sources Zi, runs the snippet you pass, then captures the exit code in `$state` and all output in `$output`.
+`zi_test` is the core of every test. It spawns a fresh, isolated Zsh subprocess, sources Zi, runs the snippet you pass, then captures the exit code in `$state` and all output in `$output`. The subprocess gets its own `HOME`, `ZDOTDIR`, XDG config and cache directories, `ZPFX` and `GOPATH` under `$ZI_DATA`, so an exported `ZPFX` or `GOPATH` in the calling shell does not reach it, and programs a test installs with `sbin` or `go install` stay under `$ZI_DATA`. Other variables, such as `PATH` and `FPATH`, are still inherited.
 
 **Signature:**
 
