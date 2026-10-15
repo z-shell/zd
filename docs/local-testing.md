@@ -23,7 +23,7 @@ The Makefile provides four targets that cover the full local workflow: running t
 make test
 ```
 
-On the first run, `make test` automatically installs `zunit`, `revolver`, and `color` into `bin/`. This mirrors exactly what the CI workflow does. Subsequent runs skip the install step (the `bin/zunit` file already exists).
+On the first run, `make test` automatically installs `zunit`, `revolver`, and `color` into `bin/`. This mirrors exactly what the CI workflow does. Subsequent runs skip the install step while the stamp `bin/.tools-<zunit commit>-<src commit>` exists; changing either pinned revision in the `Makefile` reinstalls them.
 
 ```text
 Installing zunit into bin/ ...
