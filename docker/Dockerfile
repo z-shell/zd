@@ -1,4 +1,4 @@
-FROM debian:trixie-slim AS base
+FROM debian:trixie-slim@sha256:62bd423aeee912639ca8ee681c2b762cb3e25137e0a92b20be455898a9f034ad AS base
 
 LABEL maintainer="Z-Shell Community"
 LABEL email="team@zshell.dev"
